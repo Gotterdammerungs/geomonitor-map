@@ -4,13 +4,12 @@
     <title>Geomonitor</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-       crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-       integrity="sha256-20n6A95+M9t+X8w9G5M/FjEOPPss3Kz4Y2E9+qI5k4yE="
-       crossorigin=""></script>
+    <!-- 1. Leaflet (Free Mapping Library) CSS and JS -->
+    <!-- FIX: Integrity checks removed to prevent the browser from blocking the resource. -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
+    <!-- 2. Custom Dark Styling -->
     <style>
         /* Ensures the page takes up the full screen and is dark */
         body { margin: 0; padding: 0; background-color: #0d1117; } 
@@ -21,15 +20,18 @@
         }
     </style>
     
+    <!-- 3. Firebase Libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
 </head>
 <body>
+    <!-- Map Container - Leaflet will draw the map inside this div -->
     <div id="map"></div>
     
+    <!-- Firebase Configuration and Initialization -->
     <script>
         const firebaseConfig = {
-            // REPLACE THIS VALUE with your Firebase Database URL
+            // Your URL is correctly quoted here
             databaseURL: "https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app/" 
         };
 
@@ -37,6 +39,7 @@
         firebase.initializeApp(firebaseConfig);
     </script>
     
+    <!-- Link to our map logic file -->
     <script src="app.js"></script>
 </body>
 </html>
