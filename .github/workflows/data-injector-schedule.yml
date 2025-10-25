@@ -1,14 +1,20 @@
-name: Geomonitor Data Injectoron:schedule:- cron: '*/5 * * * *'workflow_dispatch:jobs:inject_data_to_firebase:runs-on: ubuntu-latestenv:
+name: Geomonitor Data Injectoron:schedule:# Runs every 5 minutes (at minutes 0, 5, 10, etc.)- cron: '*/5 * * * *'Allows manual triggering from the Actions tabworkflow_dispatch:jobs:inject_data_to_firebase:runs-on: ubuntu-latestenv:
+  # Securely passes the Firebase URL to the Python script
   FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
 
 steps:
+  # 1. Checkout the repository code
   - uses: actions/checkout@v4
+
+  # 2. Set up Python environment
   - uses: actions/setup-python@v5
     with:
       python-version: '3.x'
 
+  # 3. Install the required Firebase library
   - name: Install Dependencies
     run: pip install firebase
 
+  # 4. Run the data injection script
   - name: Run Data Injector Script
     run: python data_injector.py
