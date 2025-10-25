@@ -1,0 +1,26 @@
+name: Geomonitor 5-Minute Data InjectorControls when the workflow runs.on:Schedule event: Runs every 5 minutes.This is the fastest reliable polling frequency supported by GitHub Actions.schedule:# Runs at minutes 0, 5, 10, 15, ..., 55 past the hour (UTC)- cron: '*/5 * * * *'Manual Trigger: Allows you to run the workflow instantly from the'Actions' tab in GitHub whenever you want to test it immediately.workflow_dispatch:A workflow run is made up of one or more jobs.jobs:inject_data_to_firebase:# Use the latest stable Ubuntu runner environment.runs-on: ubuntu-latest# Define environment variables needed for the job.
+env:
+  # Pass the Firebase URL securely from the repository secrets to the script.
+  FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
+
+steps:
+  # Step 1: Check out your repository code.
+  - name: Checkout repository
+    uses: actions/checkout@v4
+
+  # Step 2: Set up the correct Python environment.
+  - name: Set up Python
+    uses: actions/setup-python@v5
+    with:
+      python-version: '3.x'
+
+  # Step 3: Install the required dependencies (the 'firebase' library).
+  - name: Install dependencies
+    run: |
+      python -m pip install --upgrade pip
+      pip install firebase
+
+  # Step 4: Execute the Python script.
+  - name: Run Data Injector Script
+    # The script uses the FIREBASE_URL variable defined in 'env' above.
+    run: python data_injector.py
