@@ -26,24 +26,24 @@
             border: 1px solid #374151; /* Subtle border */
         }
         .leaflet-popup-content {
-            font-family: sans-serif; /* Keep generic for broad compatibility */
+            font-family: sans-serif;
             font-size: 14px;
         }
         .news-title {
             font-weight: bold;
             font-size: 16px;
-            color: #d1d5db; /* Light gray title */
+            color: #d1d5db;
             margin-bottom: 5px;
             display: block;
         }
         .news-source {
             font-size: 12px;
-            color: #a8a29e; /* Muted source text */
+            color: #a8a29e;
             margin-bottom: 5px;
             display: block;
         }
         .news-link {
-            color: #6366f1; /* Indigo link color */
+            color: #6366f1;
             text-decoration: none;
             font-weight: 600;
             display: block;
@@ -54,27 +54,29 @@
         }
     </style>
     
-    <!-- 3. Firebase v11 Libraries (Updated to use Firestore/Auth) -->
+    <!-- 3. Firebase v11 Libraries (Modernized Setup to fix Uncaught ReferenceError and missing projectId) -->
     <script type="module">
-        // Import necessary modules for Firestore and Auth
+        // Import necessary modules for the required Firestore and Auth
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // NOTE: We import Realtime Database now, just in case app.js still needs it, but we'll use modular syntax.
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
         import { getFirestore, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // --- MANDATORY ENVIRONMENT SETUP ---
-        // Load configuration and App ID from the environment
+        // Load configuration and App ID from the environment (This resolves the missing 'projectId' error)
         const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
         window.appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         
-        let app, db, auth;
+        let app, db, auth, rtdb;
 
         async function initializeFirebase() {
             try {
                 // 1. Initialize Firebase App and Services
                 app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
                 auth = getAuth(app);
-                window.db = db; // Expose db for use in app.js
+                rtdb = getDatabase(app); // Get Realtime Database instance
+                window.rtdb = rtdb; // Expose rtdb for use in app.js
                 
                 // 2. Auth: Sign in using the custom token or anonymously
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -88,7 +90,6 @@
                     if (user) {
                         window.userId = user.uid;
                     } else {
-                        // Generate a temporary ID if anonymous/unauthenticated
                         window.userId = 'guest-' + (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 9));
                     }
                     
@@ -106,13 +107,18 @@
         }
         
         window.addEventListener('load', initializeFirebase);
+        
+        // Expose Realtime Database modular functions globally for app.js (to fix 'firebase is not defined')
+        window.dbRef = ref;
+        window.onValue = onValue;
+
     </script>
 </head>
 <body>
     <!-- Map Container - Leaflet will draw the map inside this div -->
     <div id="map"></div>
     
-    <!-- Link to our map logic file (now it will use the modern 'window.db' instance) -->
+    <!-- Link to our map logic file -->
     <script src="app.js"></script>
 </body>
 </html>
