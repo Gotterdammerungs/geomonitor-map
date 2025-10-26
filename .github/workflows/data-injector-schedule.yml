@@ -10,10 +10,7 @@ on:
 jobs:
   inject_data_to_firebase:
     runs-on: ubuntu-latest
-    env:
-      # Securely passes the Firebase URL to the Python script
-      FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
-
+    
     steps:
       # 1. Checkout the repository code
       - uses: actions/checkout@v4
@@ -23,10 +20,15 @@ jobs:
         with:
           python-version: '3.x'
 
-      # 3. Install the required Firebase library
+      # 3. Install ALL required Python dependencies (The Fix!)
       - name: Install Dependencies
-        run: pip install firebase
+        # We now install geopy and requests in addition to firebase
+        run: pip install python-firebase requests geopy
 
       # 4. Run the data injection script
       - name: Run Data Injector Script
+        env:
+          # Securely passes the Firebase URL and the NEWS API Key
+          FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
+          NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }} # <-- Now included!
         run: python data_injector.py
