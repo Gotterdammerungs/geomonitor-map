@@ -6,25 +6,16 @@ from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
 # --- CONFIGURATION ---
-# The literal values you provided are set as fallbacks (defaults)
-# in case the environment variables are not explicitly set by the system.
-FIREBASE_URL_DEFAULT = 'https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app/'
-NEWS_API_KEY_DEFAULT = '7f0c06cb96494e1ca7e86eace438fd29'
-
-# 1. Your Firebase URL: Correctly retrieve the variable named 'FIREBASE_URL'.
-FIREBASE_URL = os.environ.get('FIREBASE_URL', FIREBASE_URL_DEFAULT)
-
-# 2. NewsAPI Key: Correctly retrieve the variable named 'NEWS_API_KEY'.
-NEWS_API_KEY = os.environ.get('NEWS_API_KEY', NEWS_API_KEY_DEFAULT)
+# The script now STRICTLY reads from environment variables passed by GitHub Actions
+FIREBASE_URL = os.environ.get('FIREBASE_URL')
+NEWS_API_KEY = os.environ.get('NEWS_API_KEY')
 
 # --- INITIALIZATION ---
 if not FIREBASE_URL:
-    # This check is now robust because it includes the default fallback
-    print("FATAL ERROR: FIREBASE_URL environment variable is not set and no default value provided.")
+    print("FATAL ERROR: FIREBASE_URL environment variable is not set. Check GitHub Secrets and workflow file.")
     exit(1)
 if not NEWS_API_KEY:
-    # This check is now robust because it includes the default fallback
-    print("FATAL ERROR: NEWS_API_KEY environment variable is not set and no default value provided.")
+    print("FATAL ERROR: NEWS_API_KEY environment variable is not set. Check GitHub Secrets and workflow file.")
     exit(1)
 
 try:
@@ -33,7 +24,6 @@ try:
     print(f"Successfully connected to Firebase at {FIREBASE_URL}")
     
     # Initialize Nominatim Geocoder (OpenStreetMap). 
-    # Providing a user agent is mandatory for Nominatim.
     geolocator = Nominatim(user_agent="geomonitor_news_app") 
     
 except Exception as e:
@@ -50,14 +40,12 @@ def geocode_location(location_name):
     if not location_name:
         return None, None
         
-    # Standardizing location for better results
     location_name = location_name.strip().replace(" - ", ", ")
     
     try:
         # Respecting Nominatim's usage policy (delay is crucial)
         time.sleep(1.2) 
         
-        # Geocode the location. Adding 'global' can sometimes help disambiguate.
         location = geolocator.geocode(f"{location_name}, global", timeout=10)
         
         if location:
@@ -78,17 +66,16 @@ def geocode_location(location_name):
 def fetch_and_geocode_news():
     """
     Fetches news from NewsAPI, geocodes the location, and returns a 
-    dictionary of map-ready event objects keyed by a unique ID.
+    dictionary of map-ready event objects.
     """
     
     # NewsAPI endpoint for general global news
-    # Using 'q=world' to get global coverage; feel free to change parameters.
     NEWS_API_URL = f"https://newsapi.org/v2/everything?q=world&language=en&sortBy=publishedAt&pageSize=15&apiKey={NEWS_API_KEY}"
     
     try:
         print("Starting batch job: Fetching news from NewsAPI...")
         response = requests.get(NEWS_API_URL, timeout=15)
-        response.raise_for_status() # Raise exception for 4xx/5xx status codes
+        response.raise_for_status() 
         data = response.json()
         articles = data.get('articles', [])
         print(f"Fetched {len(articles)} potential articles.")
@@ -100,9 +87,7 @@ def fetch_and_geocode_news():
     geocoded_events = {} 
 
     for i, article in enumerate(articles):
-        # Strategy: Use the source name as the main location hint (e.g., 'BBC News', 'CNN'). 
-        # This gives a general idea of where the news org is based, which is better than nothing.
-        # Alternatively, you could try to extract a city name from the 'title'.
+        # Strategy: Use the source name as the main location hint (e.g., 'BBC News', 'CNN').
         location_hint = article.get('source', {}).get('name')
         
         if not location_hint:
@@ -136,11 +121,10 @@ def push_batch_events(events):
     Clears the existing 'events' node and pushes the new batch of geocoded events.
     """
     if not events:
-        print("No geocoded events to push to Firebase. Keeping existing data (or pushing empty if desired).")
+        print("No geocoded events to push to Firebase.")
         return
 
     try:
-        # The .put() method replaces the entire node, ensuring old/stale markers are removed.
         db.put('/', 'events', events)
         print(f"PUSH COMPLETE: Replaced 'events' node with {len(events)} geolocated articles.")
     except Exception as e:
