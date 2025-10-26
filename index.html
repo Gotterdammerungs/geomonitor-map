@@ -56,14 +56,12 @@
     
     <!-- 3. Firebase v11 Libraries (Modernized Setup) -->
     <script type="module">
-        // Import necessary modular SDKs (Prioritizing Realtime Database for existing app.js logic)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js"; // Realtime DB logging
         
         // --- MANDATORY ENVIRONMENT SETUP ---
-        // Load configuration and App ID from the environment (This resolves config errors)
+        // Load configuration and App ID from the environment (Fixes configuration issues)
         const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
         window.appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         
@@ -74,13 +72,14 @@
                 // 1. Initialize Firebase App and Services
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
-                rtdb = getDatabase(app); // Get Realtime Database instance
-                window.rtdb = rtdb; // Expose rtdb instance for use in app.js
+                rtdb = getDatabase(app); 
+                window.rtdb = rtdb; 
                 
                 // 2. Auth: Sign in using the custom token or anonymously
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
+                    // Fallback to anonymous sign-in if no custom token is available
                     await signInAnonymously(auth);
                 }
                 
@@ -89,21 +88,19 @@
                     if (user) {
                         window.userId = user.uid;
                     } else {
+                        // Use a fallback unique ID for unauthenticated sessions
                         window.userId = 'guest-' + (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 9));
                     }
                     
-                    // Call the main map initialization function defined in app.js
+                    // Call the map initialization function, which will handle the Realtime DB listener
                     if (typeof initMap !== 'undefined') {
                         initMap(); 
                     }
                 });
-                
-                // setLogLevel('Debug'); // No logging function in modular DB
-                
+
             } catch (error) {
-                // IMPORTANT: The invalid-api-key error is likely caught here.
+                // Log the error but proceed with map initialization to allow mock data to display
                 console.error("Error initializing Firebase:", error);
-                // Optionally provide a fallback if Firebase completely fails
                 if (typeof initMap !== 'undefined') {
                     initMap(); 
                 }
@@ -112,7 +109,7 @@
         
         window.addEventListener('load', initializeFirebase);
         
-        // Expose Realtime Database modular functions globally for app.js (to fix 'firebase is not defined')
+        // Expose Realtime Database modular functions globally for app.js (Necessary if app.js uses old syntax)
         window.dbRef = ref;
         window.onValue = onValue;
 
