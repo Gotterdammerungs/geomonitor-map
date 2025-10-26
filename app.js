@@ -65,6 +65,7 @@ function setupRealtimeListener() {
             });
             
             // For the test, center the map on the test event (New York)
+            // Note: This will execute on every data update, potentially changing the view.
             map.setView([40.7128, -74.0060], 10); 
             
         } else {
@@ -75,4 +76,6 @@ function setupRealtimeListener() {
     });
 }
 
-// Start the whole Geomonitor process
+// 3. Start the whole Geomonitor process
+// This is the fix: calling the initialization function.
+initMap();
