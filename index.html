@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <!-- 1. Leaflet (Free Mapping Library) CSS and JS -->
-    <!-- FIX: Integrity checks removed to prevent the browser from blocking the resource. -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <!-- 2. Custom Dark Styling -->
+    <!-- 2. Custom Dark Styling & News Popup Styling -->
     <style>
         /* Ensures the page takes up the full screen and is dark */
         body { margin: 0; padding: 0; background-color: #0d1117; } 
@@ -18,28 +17,102 @@
             width: 100vw;  /* Full viewport width */
             background-color: #000;
         }
+        
+        /* --- CUSTOM NEWS POPUP STYLING (To match your dark theme) --- */
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+            background: #1f2937; /* Dark blue-gray background */
+            color: #f3f4f6;
+            border-radius: 8px; /* Rounded corners */
+            border: 1px solid #374151; /* Subtle border */
+        }
+        .leaflet-popup-content {
+            font-family: sans-serif; /* Keep generic for broad compatibility */
+            font-size: 14px;
+        }
+        .news-title {
+            font-weight: bold;
+            font-size: 16px;
+            color: #d1d5db; /* Light gray title */
+            margin-bottom: 5px;
+            display: block;
+        }
+        .news-source {
+            font-size: 12px;
+            color: #a8a29e; /* Muted source text */
+            margin-bottom: 5px;
+            display: block;
+        }
+        .news-link {
+            color: #6366f1; /* Indigo link color */
+            text-decoration: none;
+            font-weight: 600;
+            display: block;
+            margin-top: 10px;
+        }
+        .news-link:hover {
+            text-decoration: underline;
+        }
     </style>
     
-    <!-- 3. Firebase Libraries -->
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <!-- 3. Firebase v11 Libraries (Updated to use Firestore/Auth) -->
+    <script type="module">
+        // Import necessary modules for Firestore and Auth
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // --- MANDATORY ENVIRONMENT SETUP ---
+        // Load configuration and App ID from the environment
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        window.appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
+        let app, db, auth;
+
+        async function initializeFirebase() {
+            try {
+                // 1. Initialize Firebase App and Services
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                window.db = db; // Expose db for use in app.js
+                
+                // 2. Auth: Sign in using the custom token or anonymously
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                // 3. Auth State Change Listener
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        window.userId = user.uid;
+                    } else {
+                        // Generate a temporary ID if anonymous/unauthenticated
+                        window.userId = 'guest-' + (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 9));
+                    }
+                    
+                    // Call the main map initialization function defined in app.js
+                    if (typeof initMap !== 'undefined') {
+                        initMap(); 
+                    }
+                });
+                
+                setLogLevel('Debug'); 
+
+            } catch (error) {
+                console.error("Error initializing Firebase:", error);
+            }
+        }
+        
+        window.addEventListener('load', initializeFirebase);
+    </script>
 </head>
 <body>
     <!-- Map Container - Leaflet will draw the map inside this div -->
     <div id="map"></div>
     
-    <!-- Firebase Configuration and Initialization -->
-    <script>
-        const firebaseConfig = {
-            // Your URL is correctly quoted here
-            databaseURL: "https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app/" 
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-    </script>
-    
-    <!-- Link to our map logic file -->
+    <!-- Link to our map logic file (now it will use the modern 'window.db' instance) -->
     <script src="app.js"></script>
 </body>
 </html>
