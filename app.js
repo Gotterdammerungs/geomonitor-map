@@ -76,4 +76,3 @@ function setupRealtimeListener() {
 }
 
 // Start the whole Geomonitor process
-initMap();
