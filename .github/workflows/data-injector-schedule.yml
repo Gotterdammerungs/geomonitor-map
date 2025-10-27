@@ -20,15 +20,15 @@ jobs:
         with:
           python-version: '3.x'
 
-      # 3. Install ALL required Python dependencies (Using requests and geopy only)
+      # 3. Install ALL required Python dependencies (geopy, requests, and no deprecated firebase library)
       - name: Install Dependencies
-        # Python's 'requests' library is used for Firebase, no external Firebase library needed.
+        # Installing the necessary libraries for geocoding and REST calls.
         run: pip install requests geopy
 
       # 4. Run the data injection script
       - name: Run Data Injector Script
         env:
-          # Securely passes the Firebase URL and the NEWS API Key
+          # --- FIX 1: Pass the NEWS_API_KEY to the script ---
           FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
-          NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
+          NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }} 
         run: python data_injector.py
