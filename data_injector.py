@@ -41,6 +41,7 @@ def geocode_location(location_name):
         # Crucial delay to avoid overwhelming the free Nominatim service
         time.sleep(1.2) 
         
+        # We search globally to avoid misinterpreting "London" as a small US town
         location = geolocator.geocode(f"{location_name}, global", timeout=10)
         
         if location:
@@ -82,13 +83,22 @@ def fetch_and_geocode_news():
     geocoded_events = {} 
 
     for i, article in enumerate(articles):
-        # Strategy: Use the source name as the primary location hint
-        location_hint = article.get('source', {}).get('name')
+        # NEW STRATEGY: Create a combined, more descriptive location hint
+        source_name = article.get('source', {}).get('name', '')
+        article_title = article.get('title', '')
         
+        # We try to geocode the source name first, as it's cleaner.
+        location_hint = source_name
+        
+        # If the source name is too generic or missing, use the title.
+        if not location_hint or 'news' in location_hint.lower() or 'press' in location_hint.lower():
+             # If the title is less than 50 chars, use the whole thing. Otherwise, take the first 3 words.
+             location_hint = article_title if len(article_title) < 50 else ' '.join(article_title.split()[:3])
+
         if not location_hint:
             continue
 
-        # Geocoding the location
+        print(f"Attempting to geocode hint: '{location_hint}'")
         lat, lon = geocode_location(location_hint)
         
         if lat is not None and lon is not None:
@@ -97,9 +107,9 @@ def fetch_and_geocode_news():
 
             # Format the final event object for the map
             event_data = {
-                'title': article.get('title', 'No Title'),
+                'title': article_title,
                 'description': article.get('description', 'No Description'),
-                'type': article.get('source', {}).get('name', 'General News'),
+                'type': source_name or 'General News',
                 'severity': 'Info',
                 'url': article.get('url', '#'),
                 'lat': lat,
