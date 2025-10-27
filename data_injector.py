@@ -1,21 +1,19 @@
 import time
 import os
-import requests # requests is now used for both NewsAPI and Firebase
+import requests # Used for both NewsAPI and Firebase REST
 import json
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
 # --- CONFIGURATION ---
-# The script now STRICTLY reads from environment variables passed by GitHub Actions
+# Reads from environment variables passed by GitHub Actions
 FIREBASE_URL = os.environ.get('FIREBASE_URL')
 NEWS_API_KEY = os.environ.get('NEWS_API_KEY')
 
-# --- INITIALIZATION ---
-if not FIREBASE_URL:
-    print("FATAL ERROR: FIREBASE_URL environment variable is not set. Check GitHub Secrets and workflow file.")
-    exit(1)
-if not NEWS_API_KEY:
-    print("FATAL ERROR: NEWS_API_KEY environment variable is not set. Check GitHub Secrets and workflow file.")
+# --- INITIALIZATION & SETUP ---
+if not FIREBASE_URL or not NEWS_API_KEY:
+    # This check is still necessary in case the Action fails to set the variables
+    print("FATAL ERROR: FIREBASE_URL or NEWS_API_KEY environment variable is not set.")
     exit(1)
 
 try:
@@ -24,7 +22,6 @@ try:
     print("Successfully initialized services (NewsAPI access and Geocoder ready).")
     
 except Exception as e:
-    # This should rarely fail, as it just initializes the geolocator object
     print(f"Error initializing services: {e}")
     exit(1)
 
@@ -41,7 +38,7 @@ def geocode_location(location_name):
     location_name = location_name.strip().replace(" - ", ", ")
     
     try:
-        # Respecting Nominatim's usage policy (delay is crucial)
+        # Crucial delay to avoid overwhelming the free Nominatim service
         time.sleep(1.2) 
         
         location = geolocator.geocode(f"{location_name}, global", timeout=10)
@@ -57,7 +54,7 @@ def geocode_location(location_name):
         print(f"  -> SERVICE ERROR/TIMEOUT for '{location_name}': {e}. Skipping.")
         return None, None
     except Exception as e:
-        print(f"  -> UNEXPECTED ERROR: {e}. Skipping.")
+        print(f"  -> UNEXPECTED ERROR during geocoding: {e}. Skipping.")
         return None, None
 
 
@@ -85,7 +82,7 @@ def fetch_and_geocode_news():
     geocoded_events = {} 
 
     for i, article in enumerate(articles):
-        # Strategy: Use the source name as the main location hint (e.g., 'BBC News', 'CNN').
+        # Strategy: Use the source name as the primary location hint
         location_hint = article.get('source', {}).get('name')
         
         if not location_hint:
@@ -96,7 +93,6 @@ def fetch_and_geocode_news():
         
         if lat is not None and lon is not None:
             # Create a unique key for Firebase
-            # Using a simple sequential index and time to ensure uniqueness
             event_key = f"news_{int(time.time())}_{i}"
 
             # Format the final event object for the map
@@ -118,22 +114,27 @@ def fetch_and_geocode_news():
 def push_batch_events(events):
     """
     Clears the existing 'events' node and pushes the new batch of geocoded events 
-    directly using the Firebase REST API via 'requests'.
+    directly using the Firebase REST API via 'requests.put'.
     """
     if not events:
-        print("No geocoded events to push to Firebase.")
-        return
+        print("No geocoded events to push to Firebase. Database will remain empty.")
+        # We still need to push an empty object to clear any old/stale data
+        events = {}
+
 
     # Firebase REST API endpoint structure: [BASE_URL]/[PATH].json
-    # The put operation must replace the entire 'events' node to remove old markers.
+    # PUT replaces the entire data node, which is what we want.
     FIREBASE_REST_URL = f"{FIREBASE_URL}/events.json"
 
     try:
-        # Use PUT to overwrite the entire /events node
         response = requests.put(FIREBASE_REST_URL, data=json.dumps(events))
         response.raise_for_status() # Raise exception for bad status codes
         
-        print(f"PUSH COMPLETE: Replaced 'events' node with {len(events)} geolocated articles.")
+        if events:
+            print(f"PUSH COMPLETE: Replaced 'events' node with {len(events)} geolocated articles.")
+        else:
+            print("PUSH COMPLETE: Cleared 'events' node in Firebase.")
+            
     except requests.exceptions.RequestException as e:
         print(f"PUSH FAILED to Firebase via REST API. Error: {e}")
     except Exception as e:
