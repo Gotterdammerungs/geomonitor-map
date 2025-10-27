@@ -1,7 +1,7 @@
 import time
 import os
-import requests
-from firebase_rest import Firebase # <-- UPDATED IMPORT
+import requests # requests is now used for both NewsAPI and Firebase
+import json
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
@@ -19,15 +19,12 @@ if not NEWS_API_KEY:
     exit(1)
 
 try:
-    # Initialize Firebase connection using the modern Firebase class
-    # The Firebase class from firebase_rest takes the base URL without .json
-    db = Firebase(FIREBASE_URL) 
-    print(f"Successfully connected to Firebase at {FIREBASE_URL}")
-    
     # Initialize Nominatim Geocoder (OpenStreetMap). 
     geolocator = Nominatim(user_agent="geomonitor_news_app") 
+    print("Successfully initialized services (NewsAPI access and Geocoder ready).")
     
 except Exception as e:
+    # This should rarely fail, as it just initializes the geolocator object
     print(f"Error initializing services: {e}")
     exit(1)
 
@@ -99,6 +96,7 @@ def fetch_and_geocode_news():
         
         if lat is not None and lon is not None:
             # Create a unique key for Firebase
+            # Using a simple sequential index and time to ensure uniqueness
             event_key = f"news_{int(time.time())}_{i}"
 
             # Format the final event object for the map
@@ -119,18 +117,27 @@ def fetch_and_geocode_news():
 
 def push_batch_events(events):
     """
-    Clears the existing 'events' node and pushes the new batch of geocoded events.
+    Clears the existing 'events' node and pushes the new batch of geocoded events 
+    directly using the Firebase REST API via 'requests'.
     """
     if not events:
         print("No geocoded events to push to Firebase.")
         return
 
+    # Firebase REST API endpoint structure: [BASE_URL]/[PATH].json
+    # The put operation must replace the entire 'events' node to remove old markers.
+    FIREBASE_REST_URL = f"{FIREBASE_URL}/events.json"
+
     try:
-        # The put method now only takes the path and the data payload
-        db.put('events', events) 
+        # Use PUT to overwrite the entire /events node
+        response = requests.put(FIREBASE_REST_URL, data=json.dumps(events))
+        response.raise_for_status() # Raise exception for bad status codes
+        
         print(f"PUSH COMPLETE: Replaced 'events' node with {len(events)} geolocated articles.")
+    except requests.exceptions.RequestException as e:
+        print(f"PUSH FAILED to Firebase via REST API. Error: {e}")
     except Exception as e:
-        print(f"PUSH FAILED to Firebase: {e}")
+        print(f"UNEXPECTED PUSH ERROR: {e}")
 
 
 # --- MAIN EXECUTION ---
