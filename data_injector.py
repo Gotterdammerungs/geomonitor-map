@@ -1,7 +1,7 @@
 import time
 import os
 import requests
-from firebase import firebase
+from firebase_rest import Firebase # <-- UPDATED IMPORT
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
@@ -19,8 +19,9 @@ if not NEWS_API_KEY:
     exit(1)
 
 try:
-    # Initialize Firebase connection
-    db = firebase.FirebaseApplication(FIREBASE_URL, None)
+    # Initialize Firebase connection using the modern Firebase class
+    # The Firebase class from firebase_rest takes the base URL without .json
+    db = Firebase(FIREBASE_URL) 
     print(f"Successfully connected to Firebase at {FIREBASE_URL}")
     
     # Initialize Nominatim Geocoder (OpenStreetMap). 
@@ -125,7 +126,8 @@ def push_batch_events(events):
         return
 
     try:
-        db.put('/', 'events', events)
+        # The put method now only takes the path and the data payload
+        db.put('events', events) 
         print(f"PUSH COMPLETE: Replaced 'events' node with {len(events)} geolocated articles.")
     except Exception as e:
         print(f"PUSH FAILED to Firebase: {e}")
