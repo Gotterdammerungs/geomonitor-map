@@ -20,10 +20,10 @@ jobs:
         with:
           python-version: '3.x'
 
-      # 3. Install ALL required Python dependencies (Switching to firebase-rest)
+      # 3. Install ALL required Python dependencies (Using requests and geopy only)
       - name: Install Dependencies
-        # Installing firebase-rest (the updated library) along with requests and geopy
-        run: pip install firebase-rest requests geopy
+        # Python's 'requests' library is used for Firebase, no external Firebase library needed.
+        run: pip install requests geopy
 
       # 4. Run the data injection script
       - name: Run Data Injector Script
