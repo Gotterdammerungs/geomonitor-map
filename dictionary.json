@@ -83,8 +83,7 @@
   "donbas": "Donbas, Ukraine",
   "taiwan": "Taiwan",
   "south china sea": "South China Sea",
-  "kashmir": "Kashmir"
-
+  "kashmir": "Kashmir",
   
   "comment_financial_corps_hqs": "Headquarters of major financial and non-tech corporations",
   "bank of america": "Bank of America Corporate Center, Charlotte, North Carolina, USA",
@@ -198,7 +197,7 @@
   "samsung electronics": "Suwon, South Korea",
   "adobe": "San Jose, California, USA",
   "oracle": "Austin, Texas, USA",
-  "sap": "Walldorf, Germany"
+  "sap": "Walldorf, Germany",
 
   "comment_stock_exchanges": "Major global stock exchanges",
   "nasdaq": "One Liberty Plaza, New York, USA",
