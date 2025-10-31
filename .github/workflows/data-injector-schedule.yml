@@ -23,7 +23,7 @@ jobs:
       # 3. Install ALL required Python dependencies (geopy, requests, and no deprecated firebase library)
       - name: Install Dependencies
         # Installing the necessary libraries for geocoding and REST calls.
-        run: pip install requests geopy
+        run: pip install -U geopy
 
       # 4. Run the data injection script
       - name: Run Data Injector Script
