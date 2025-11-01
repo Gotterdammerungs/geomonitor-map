@@ -172,4 +172,18 @@ body.light #panel button:hover {
    ============================ */
 #panel label {
   display: block;
-  margin-top
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+#crt-intensity {
+  width: 100%;
+  accent-color: #22c55e;
+  margin-top: 4px;
+  cursor: pointer;
+}
+
+#crt-intensity:focus {
+  outline: none;
+}
