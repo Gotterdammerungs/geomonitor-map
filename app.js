@@ -1,83 +1,126 @@
 // Global variables
-let activeMarkers = {}; // Stores markers currently on the map
+let activeMarkers = {};
 let map;
 
 // 1. Initialize the Map
 function initMap() {
-    // Create map centered on the world
-    map = L.map('map').setView([20, 0], 2); // Center: near the equator, Zoom: 2 (world view)
+    map = L.map('map').setView([20, 0], 2);
 
-    // Add a dark, satellite-style base layer (using CARTO's dark map tiles)
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
         subdomains: 'abcd',
-        maxZoom: 19
+        maxZoom: 12,
     }).addTo(map);
 
-    console.log("Map initialized and dark theme applied.");
-    
-    // Start listening for data immediately after map is ready
+    console.log("🗺️ Map initialized.");
+
     setupRealtimeListener();
 }
 
-// 2. Setup Real-Time Listener
+// 2. Define colors by topic
+function getTopicColor(topic) {
+    topic = (topic || "").toLowerCase();
+    switch (topic) {
+        case "geopolitics":
+        case "conflict":
+        case "diplomacy":
+        case "security":
+            return "red";
+        case "economy":
+        case "finance":
+            return "green";
+        case "technology":
+        case "cyber":
+        case "science":
+            return "deepskyblue";
+        case "environment":
+        case "disaster":
+        case "energy":
+            return "orange";
+        default:
+            return "white"; // fallback for unknown topics
+    }
+}
+
+// 3. Define visibility by importance (zoom threshold)
+function getMinZoomForImportance(importance) {
+    switch (parseInt(importance)) {
+        case 5: return 0;  // global
+        case 4: return 3;
+        case 3: return 5;
+        case 2: return 7;
+        case 1:
+        default: return 9; // local
+    }
+}
+
+// 4. Realtime listener for Firebase
 function setupRealtimeListener() {
-    // Reference the 'events' node in your Firebase database
     const dbRef = firebase.database().ref('/events');
-    
-    // Function to clear all existing markers from the map
+
     const clearMarkers = () => {
-        Object.values(activeMarkers).forEach(marker => map.removeLayer(marker));
+        Object.values(activeMarkers).forEach(({ marker }) => map.removeLayer(marker));
         activeMarkers = {};
     };
 
-    // This runs EVERY time data changes in Firebase (the 'real-time' magic!)
     dbRef.on('value', (snapshot) => {
-        clearMarkers(); // Clear old data to prevent duplication
-
+        clearMarkers();
         const events = snapshot.val();
-        if (events) {
-            console.log(`Received ${Object.keys(events).length} events from Firebase.`);
-            
-            Object.entries(events).forEach(([key, event]) => {
-                // Check for required location data
-                if (event.lat && event.lon) {
-                    const lat = event.lat;
-                    const lon = event.lon;
-                    
-                    // ✅ Updated popup content with clickable link
-                    const popupContent = `
-                        <div style="font-family: sans-serif; font-size: 14px;">
-                            <b>${event.title || 'Unknown Event'}</b><br>
-                            <span>${event.type || 'N/A'}</span>, Severity: ${event.severity || 'N/A'}<br>
-                            <div>${event.description || ''}</div>
-                            ${
-                                event.url
-                                    ? `<div><a href="${event.url}" target="_blank" rel="noopener noreferrer">Read full article</a></div>`
-                                    : ''
-                            }
-                        </div>
-                    `;
-                    
-                    // Create a marker and add it to the map
-                    const marker = L.marker([lat, lon]).addTo(map)
-                        .bindPopup(popupContent);
-                        
-                    // Store the marker
-                    activeMarkers[key] = marker;
-                }
-            });
-            
-            // For testing: center on New York (remove later if not needed)
-            map.setView([40.7128, -74.0060], 10); 
-            
-        } else {
-            console.log("No events found in the database.");
+        if (!events) {
+            console.log("⚠️ No events found in database.");
+            return;
         }
-    }, (error) => {
-         console.error("Firebase connection error:", error.message);
+
+        console.log(`📡 Received ${Object.keys(events).length} events.`);
+
+        Object.entries(events).forEach(([key, event]) => {
+            if (!event.lat || !event.lon) return;
+
+            const { lat, lon, title, description, type, importance, topic, url } = event;
+
+            const color = getTopicColor(topic);
+            const minZoom = getMinZoomForImportance(importance);
+
+            const marker = L.circleMarker([lat, lon], {
+                radius: 7,
+                color,
+                fillColor: color,
+                fillOpacity: 0.85,
+                weight: 1.5
+            });
+
+            const popupHTML = `
+                <div style="font-family:sans-serif;color:#fff;max-width:250px;">
+                    <div class="news-title">${title || "Untitled"}</div>
+                    <div class="news-source">${type || "Unknown Source"}</div>
+                    <div class="news-topic">Topic: ${topic || "N/A"} | Importance: ${importance || "?"}</div>
+                    <div class="news-desc">${description || ""}</div>
+                    ${url ? `<a href="${url}" target="_blank" class="news-link">Read full article →</a>` : ""}
+                </div>
+            `;
+
+            marker.bindPopup(popupHTML);
+            activeMarkers[key] = { marker, minZoom };
+            marker.addTo(map);
+        });
+
+        updateMarkerVisibility();
+        map.on("zoomend", updateMarkerVisibility);
     });
 }
 
-// 3. Start the whole Geomonitor process
+// 5. Update marker visibility based on zoom
+function updateMarkerVisibility() {
+    const zoom = map.getZoom();
+    Object.values(activeMarkers).forEach(({ marker, minZoom }) => {
+        if (zoom >= minZoom) {
+            if (!map.hasLayer(marker)) map.addLayer(marker);
+        } else {
+            if (map.hasLayer(marker)) map.removeLayer(marker);
+        }
+    });
+}
+
+// 6. Start
 initMap();
