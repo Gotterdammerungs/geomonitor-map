@@ -34,8 +34,8 @@ FIREBASE_URL = os.environ.get(
     "FIREBASE_URL",
     "https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app"
 )
-NEWS_API_KEY = os.environ.get("NEWS_API_KEY")
-GEOAPIFY_KEY = os.environ.get("GEOAPIFY_KEY")
+NEWS_API_KEY = os.environ.get("7f0c06cb96494e1ca7e86eace438fd29")
+GEOAPIFY_KEY = os.environ.get("c23e2a4291644b5a812ae44b97722caf")
 
 log("Booting Geomonitor Data Injector...")
 log(f"Firebase URL: {FIREBASE_URL}")
