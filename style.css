@@ -1,90 +1,149 @@
-body {
+/* === General map === */
+html, body {
   margin: 0;
-  font-family: "Inter", system-ui, sans-serif;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-body.dark {
-  background: #0d1117;
-  color: #f3f4f6;
-}
-
-body.light {
-  background: #f3f4f6;
-  color: #111827;
+  height: 100%;
+  background: #0a0a0a;
+  overflow: hidden;
+  font-family: "Noto Sans", sans-serif;
 }
 
 #map {
-  height: 100vh;
-  width: 100vw;
+  width: 100%;
+  height: 100%;
 }
 
-#control-panel {
+/* === Control panel === */
+.control-panel {
   position: absolute;
-  bottom: 15px;
-  right: 15px;
-  z-index: 1000;
-  font-size: 14px;
-}
-
-#panel-toggle {
-  background: #1f2937;
-  color: #f3f4f6;
-  border: 1px solid #374151;
-  border-radius: 8px;
-  padding: 6px 10px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-#panel {
-  margin-top: 8px;
-  background: #1f2937;
-  padding: 10px 14px;
+  bottom: 1rem;
+  right: 1rem;
+  background: rgba(20, 20, 20, 0.85);
+  color: #eee;
   border-radius: 10px;
-  border: 1px solid #374151;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  padding: 1rem 1.25rem;
+  z-index: 1000;
   width: 230px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
 }
 
-.hidden { display: none; }
-
-#panel h4 { margin: 0 0 6px 0; font-size: 14px; }
-
-#panel ul { list-style: none; padding: 0; margin: 0; }
-#panel li { display: flex; align-items: center; margin-bottom: 4px; }
-
-.dot {
-  display: inline-block; width: 12px; height: 12px;
-  border-radius: 50%; margin-right: 8px;
-}
-.dot.red { background: red; }
-.dot.green { background: limegreen; }
-.dot.blue { background: deepskyblue; }
-.dot.orange { background: orange; }
-.dot.white { background: white; }
-
-#panel button, #panel input {
-  width: 100%; margin-top: 8px;
+.control-panel h3 {
+  margin: 0 0 0.6rem 0;
+  font-size: 1rem;
+  text-align: center;
+  color: #4fd1c5;
 }
 
-#panel button {
-  border: 1px solid #374151;
-  border-radius: 8px;
-  padding: 6px 10px;
-  cursor: pointer;
-  background: #111827;
-  color: #f3f4f6;
-  font-weight: 600;
+/* === Switch === */
+.switch {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
-#panel label {
+.switch input {
+  display: none;
+}
+
+.switch .slider {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 18px;
+  background-color: #444;
+  border-radius: 34px;
+  margin-right: 8px;
+  transition: 0.3s;
+}
+
+.switch .slider::before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 3px;
+  top: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.switch input:checked + .slider {
+  background-color: #4fd1c5;
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(16px);
+}
+
+.switch .label {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+/* === CRT === */
+:root {
+  --crt-opacity: 0.5;
+}
+
+.crt-scanlines::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+              linear-gradient(90deg, rgba(255, 0, 0, 0.06),
+              rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  z-index: 9999;
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+  opacity: var(--crt-opacity);
+}
+
+.crt-flicker::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 16, 16, 0.1);
+  pointer-events: none;
+  animation: flicker 0.15s infinite;
+  opacity: var(--crt-opacity);
+}
+
+@keyframes flicker {
+  0% { opacity: 0.25; }
+  50% { opacity: 0.75; }
+  100% { opacity: 0.25; }
+}
+
+/* === CRT slider === */
+.crt-container {
+  margin-top: 8px;
+}
+
+.crt-container label {
   display: block;
-  margin-top: 10px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
 }
 
-#crt-intensity {
-  accent-color: #22c55e;
+.crt-container input[type="range"] {
+  width: 100%;
+}
+
+/* === Light theme === */
+body.light .control-panel {
+  background: rgba(255, 255, 255, 0.85);
+  color: #222;
+}
+
+body.light .switch .slider {
+  background-color: #ccc;
+}
+
+body.light .switch input:checked + .slider {
+  background-color: #3b82f6;
+}
+
+body.light .control-panel h3 {
+  color: #3b82f6;
 }
