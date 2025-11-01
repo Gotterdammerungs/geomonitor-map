@@ -1,72 +1,74 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Geomonitor</title>
 
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-o9N1j+1bA7rQbyNL7dC6J9D67H/rdl5pPp+6G6K/Vj0="
+    crossorigin=""
+  />
 
-  <!-- CSS -->
+  <!-- Your custom CSS -->
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Firebase (v8 used previously in your project) -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-  <script>
-    // ---------- IMPORTANT ----------
-    // This placeholder will be replaced by the GitHub Actions workflow
-    // at deploy time with your real MapTiler key.
-    const MAPTILER_KEY = "MAPTILER_KEY_PLACEHOLDER";
-  </script>
-
-  <script>
-    // Minimal Firebase init (use your config or keep this)
-    const firebaseConfig = {
-      apiKey: "AIzaSyDtdaS3UfXUokfyQme9r-w52bMalq1aIhU",
-      authDomain: "geomonitor-2025.firebaseapp.com",
-      databaseURL: "https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "geomonitor-2025",
-      storageBucket: "geomonitor-2025.firebasestorage.app",
-      messagingSenderId: "454720047299",
-      appId: "1:454720047299:web:9578c37314bc1f43b53a76",
-      measurementId: "G-2VQE4SDRF3"
-    };
-    firebase.initializeApp(firebaseConfig);
-    firebase.auth().signInAnonymously().catch(err => console.warn("Firebase auth:", err && err.message));
-  </script>
 </head>
-<body class="crt-scanlines crt-flicker crt-colorsep" data-theme="dark">
+
+<body data-theme="dark" class="crt-scanlines crt-flicker">
+
+  <!-- Map container -->
   <div id="map"></div>
 
-  <!-- Control panel (bottom-right) -->
-  <div id="gm-control-panel" aria-hidden="false">
-    <button id="gm-panel-toggle" aria-expanded="false">☰</button>
+  <!-- Control panel -->
+  <div id="gm-control-panel">
+    <button id="gm-panel-toggle" aria-expanded="false">⚙️ Settings</button>
     <div id="gm-panel" class="gm-hidden" role="dialog" aria-hidden="true">
-      <h4>🗺️ Map Themes</h4>
-
-      <label for="gm-theme-selector">Theme</label>
-      <select id="gm-theme-selector" aria-label="Select map theme">
-        <option value="dark" selected>Dark</option>
-        <option value="light">Light</option>
-        <option value="solarized">Solarized</option>
-        <option value="satellite">Satellite</option>
-      </select>
-
-      <label for="crt-intensity" style="margin-top:10px;">📺 CRT Intensity</label>
-      <input id="crt-intensity" type="range" min="0" max="1" step="0.05" value="0.45">
-
-      <div id="status" style="margin-top:10px;font-size:13px;color:#bfc7ce;">
-        Status: <span id="status-text">idle</span>
-      </div>
+      <h4>Map Options</h4>
+      <label for="gm-theme-selector">Tile Theme</label>
+      <select id="gm-theme-selector"></select>
+      <label for="crt-intensity">CRT Intensity</label>
+      <input type="range" id="crt-intensity" min="0" max="1" step="0.05" value="0.45" />
     </div>
   </div>
 
-  <!-- App JS (verbose) -->
+  <!-- Status -->
+  <div id="status-text" style="position:fixed;bottom:6px;left:12px;font-size:13px;color:#ccc;"></div>
+
+  <!-- 🔑 Define MapTiler key BEFORE app.js -->
+  <script>
+    // 🔒 Use your actual MapTiler key here
+    const MAPTILER_KEY = "YOUR_MAPTILER_API_KEY_HERE";
+  </script>
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-o9K8YyM5p9RLFmFv4yj8ErfR8lAA7jDk9eW5wlqf0L0="
+    crossorigin=""
+  ></script>
+
+  <!-- Firebase (optional, required for your events to load) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script>
+    // Replace this with your Firebase config if you haven’t already
+    const firebaseConfig = {
+      apiKey: "YOUR_FIREBASE_API_KEY",
+      authDomain: "geomonitor-2025.firebaseapp.com",
+      databaseURL: "https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app/",
+      projectId: "geomonitor-2025",
+      storageBucket: "geomonitor-2025.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:abcdef123456"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
+  <!-- Your app logic -->
   <script src="app.js"></script>
+
 </body>
 </html>
