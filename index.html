@@ -30,13 +30,11 @@
       measurementId: "G-2VQE4SDRF3"
     };
     firebase.initializeApp(firebaseConfig);
-    firebase.auth().signInAnonymously().catch(function(error) {
-      console.error("Firebase Auth Error:", error.message);
-    });
+    firebase.auth().signInAnonymously().catch(err => console.error(err.message));
   </script>
 </head>
 
-<body class="dark crt">
+<body class="dark crt-scanlines crt-flicker crt-colorsep">
   <div id="map"></div>
 
   <!-- Control panel (bottom-right) -->
@@ -52,7 +50,8 @@
         <li><span class="dot white"></span> Other / Uncategorized</li>
       </ul>
       <hr>
-      <button id="crt-toggle">🧠 CRT Mode: ON</button>
+      <label for="crt-intensity">📺 CRT Intensity</label>
+      <input id="crt-intensity" type="range" min="0" max="1" step="0.05" value="0.5">
       <button id="theme-toggle">🌙 Dark Mode</button>
     </div>
   </div>
