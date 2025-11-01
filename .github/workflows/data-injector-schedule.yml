@@ -1,79 +1,85 @@
-name: Geomonitor Build + Deploy
+name: Geomonitor Data Injector + Web Deploy
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    # Run every 5 minutes
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
-  run_injector:
-    name: 🧠 Inject data into Firebase
+  run_data_injector:
+    name: 🧠 Data Injector
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: "3.x"
 
-      - name: Install Python dependencies
+      - name: 📦 Install dependencies
         run: pip install requests geopy python-dotenv
 
-      - name: Run data injector
+      - name: 🚀 Run data injector script
         env:
           FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
           NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
           GEOAPIFY_KEY: ${{ secrets.GEOAPIFY_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-        run: python data_injector.py
+        run: |
+          echo "=== Running Geomonitor Data Injector ==="
+          python data_injector.py
+          echo "=== Data Injection Complete ==="
 
-      - name: Prepare index.html for deploy (inject MapTiler key)
+  deploy_to_pages:
+    name: 🌍 Deploy Web App
+    runs-on: ubuntu-latest
+    needs: run_data_injector
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🧰 Install jq and perl for key injection
+        run: sudo apt-get update && sudo apt-get install -y jq perl
+
+      - name: 🔧 Inject MapTiler key safely
         env:
           MAPTILER_KEY: ${{ secrets.MAPTILER_KEY }}
         run: |
-          echo "🔧 Injecting MapTiler key into index.html (placeholder -> secret)"
-          # make a copy to avoid modifying history on main; we deploy from workspace
+          echo "🔧 Injecting MapTiler key into index.html safely..."
+          if [ -z "$MAPTILER_KEY" ]; then
+            echo "❌ ERROR: Missing MAPTILER_KEY secret!"
+            exit 1
+          fi
           cp index.html index.html.deploy
-          # replace placeholder
-          sed -i "s|MAPTILER_KEY_PLACEHOLDER|$MAPTILER_KEY|g" index.html.deploy
-          # show a tiny preview (first 6 lines) for logs (the key will be censored)
-          echo "----- index.html.deploy preview -----"
-          head -n 12 index.html.deploy
-          echo "-------------------------------------"
-
-      - name: Upload prepared site files
-        uses: actions/upload-artifact@v4
-        with:
-          name: site-files
-          path: |
-            index.html.deploy
-            app.js
-            style.css
-            # add other static assets you want to publish (images, fonts, etc.)
-
-  deploy_site:
-    name: 🌐 Deploy to GitHub Pages
-    needs: run_injector
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download prepared site files
-        uses: actions/download-artifact@v4
-        with:
-          name: site-files
-
-      - name: Move prepared files into place
-        run: |
+          # Replace placeholder with actual key safely
+          perl -pe 's/MAPTILER_KEY_PLACEHOLDER/$ENV{MAPTILER_KEY}/g' index.html > index.html.deploy
+          head -n 15 index.html.deploy
           mv index.html.deploy index.html
-          ls -la
+          echo "✅ MapTiler key injection done."
 
-      - name: Deploy to GitHub Pages
+      - name: 🪣 Prepare deployment folder
+        run: |
+          mkdir public
+          cp -r index.html app.js style.css dictionary.json public/ || true
+          echo "✅ Files ready for deploy:"
+          ls -al public/
+
+      - name: 🚀 Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
           publish_branch: gh-pages
-          publish_dir: ./
+          commit_message: "Deploy Geomonitor frontend 🚀"
+
+      - name: ✅ Done
+        run: echo "🎉 Deployment complete! View at: https://gotterdammerungs.github.io/geomonitor-map/"
