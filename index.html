@@ -5,24 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Geomonitor</title>
 
-  <!-- Leaflet CSS -->
+  <!-- ✅ Fixed Leaflet CSS (no integrity) -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-o9N1j+1bA7rQbyNL7dC6J9D67H/rdl5pPp+6G6K/Vj0="
-    crossorigin=""
   />
 
-  <!-- Your custom CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body data-theme="dark" class="crt-scanlines crt-flicker">
-
-  <!-- Map container -->
   <div id="map"></div>
 
-  <!-- Control panel -->
+  <!-- Control Panel -->
   <div id="gm-control-panel">
     <button id="gm-panel-toggle" aria-expanded="false">⚙️ Settings</button>
     <div id="gm-panel" class="gm-hidden" role="dialog" aria-hidden="true">
@@ -34,27 +29,20 @@
     </div>
   </div>
 
-  <!-- Status -->
   <div id="status-text" style="position:fixed;bottom:6px;left:12px;font-size:13px;color:#ccc;"></div>
 
-  <!-- 🔑 Define MapTiler key BEFORE app.js -->
+  <!-- 🔑 MapTiler key injected automatically by GitHub Actions -->
   <script>
-    // 🔒 Use your actual MapTiler key here
-    const MAPTILER_KEY = "YOUR_MAPTILER_API_KEY_HERE";
+    const MAPTILER_KEY = "YOUR_MAPTILER_API_KEY_HERE"; // replaced during deploy
   </script>
 
-  <!-- Leaflet JS -->
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-o9K8YyM5p9RLFmFv4yj8ErfR8lAA7jDk9eW5wlqf0L0="
-    crossorigin=""
-  ></script>
+  <!-- ✅ Fixed Leaflet JS (no integrity) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Firebase (optional, required for your events to load) -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script>
-    // Replace this with your Firebase config if you haven’t already
     const firebaseConfig = {
       apiKey: "YOUR_FIREBASE_API_KEY",
       authDomain: "geomonitor-2025.firebaseapp.com",
@@ -67,8 +55,6 @@
     firebase.initializeApp(firebaseConfig);
   </script>
 
-  <!-- Your app logic -->
   <script src="app.js"></script>
-
 </body>
 </html>
