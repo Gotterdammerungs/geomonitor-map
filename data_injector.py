@@ -107,20 +107,24 @@ def resolve_location_name(article: dict):
         log(f"📰 Dateline match → {dateline}")
         return dateline
 
-    # 3️⃣ Keyword
+    # 3️⃣ Safer keyword matching
     lower_text = combined.lower()
-    for word, loc in CUSTOM_LOCATIONS.items():
-        if word in lower_text:
-            log(f"📗 Keyword match: {word} → {loc}")
+    dict_items_sorted = sorted(CUSTOM_LOCATIONS.items(), key=lambda kv: -len(kv[0]))
+    for word, loc in dict_items_sorted:
+        if len(word) <= 2:
+            continue
+        pattern = r'\b' + re.escape(word.lower()) + r'\b'
+        if re.search(pattern, lower_text):
+            log(f"📗 Keyword match (word-boundary): {word} → {loc}")
             return loc
 
-    # 4️⃣ Regex
+    # 4️⃣ Regex fallback
     regex_hint = extract_location_hint(combined)
     if regex_hint:
         log(f"📍 Regex match → {regex_hint}")
         return regex_hint
 
-    log("⚠️ No location found.")
+    log("⚠️ No location found by any method.")
     return None
 
 
@@ -143,16 +147,21 @@ def geocode_location(location_name: str):
     if not location_name:
         return None, None
     location_name = location_name.strip().replace(" - ", ", ")
-
+    log(f"Attempting geocode for hint: '{location_name}'")
     time.sleep(1.2)  # rate limit
+
+    # Try Nominatim
     try:
         loc = geolocator_nom.geocode(f"{location_name}, global", timeout=10)
         if loc:
             log(f"🗺️ Nominatim → '{location_name}' → ({loc.latitude:.4f}, {loc.longitude:.4f})")
             return loc.latitude, loc.longitude
+        else:
+            log(f"⚠️ Nominatim returned no result for '{location_name}'")
     except Exception as e:
-        log(f"⚠️ Nominatim failed for '{location_name}': {e}")
+        log(f"⚠️ Nominatim error for '{location_name}': {e}")
 
+    # Geoapify fallback
     if geolocator_geo:
         try:
             loc = geolocator_geo.geocode(location_name, timeout=10)
@@ -160,7 +169,7 @@ def geocode_location(location_name: str):
                 log(f"🌐 Geoapify → '{location_name}' → ({loc.latitude:.4f}, {loc.longitude:.4f})")
                 return loc.latitude, loc.longitude
             else:
-                log(f"⚠️ Geoapify could not find '{location_name}'")
+                log(f"⚠️ Geoapify returned no result for '{location_name}'")
         except Exception as e:
             log(f"⚠️ Geoapify error for '{location_name}': {e}")
 
