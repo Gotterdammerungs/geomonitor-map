@@ -1,4 +1,4 @@
-name: Geomonitor Data Injector + Site Deploy
+name: Geomonitor Data Injector + Deploy
 
 on:
   schedule:
@@ -9,21 +9,18 @@ permissions:
   contents: write
 
 jobs:
-  inject_data_to_firebase:
-    name: 🧠 Inject News Data to Firebase
+  run_injector:
+    name: 🧠 Inject data into Firebase
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: pip install requests geopy python-dotenv
-
-      - name: Run Data Injector Script
+      - name: Run data injector
         env:
           FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
           NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
@@ -31,40 +28,37 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: python data_injector.py
 
-      # 1️⃣ Create config.json and upload as artifact
-      - name: Create config.json
+      # Create config.json containing the MapTiler key
+      - name: Create map config
         run: |
           echo "{\"maptiler_key\": \"${{ secrets.MAPTILER_KEY }}\"}" > config.json
           cat config.json
-        shell: bash
 
-      - name: Upload config.json for deploy job
+      - name: Upload config.json artifact
         uses: actions/upload-artifact@v4
         with:
-          name: config
+          name: site-config
           path: config.json
 
-  build_and_deploy:
-    name: 🌐 Build & Deploy Frontend (GitHub Pages)
+  deploy_site:
+    name: 🌐 Deploy to GitHub Pages
+    needs: run_injector
     runs-on: ubuntu-latest
-    needs: inject_data_to_firebase
 
     steps:
       - uses: actions/checkout@v4
 
-      # 2️⃣ Download the config.json from previous job
       - name: Download config.json
         uses: actions/download-artifact@v4
         with:
-          name: config
+          name: site-config
 
-      # 3️⃣ Confirm it’s here (for debugging)
-      - name: Verify config.json presence
+      - name: Verify config.json
         run: cat config.json
 
-      # 4️⃣ Deploy everything (including config.json)
-      - name: Deploy to GitHub Pages
+      - name: Deploy all files (including config.json)
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
           publish_dir: ./
