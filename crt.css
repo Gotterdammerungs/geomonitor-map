@@ -2,56 +2,40 @@
   --crt-opacity: 0.5;
 }
 
-/* === CRT Scanlines Effect === */
+/* scanlines */
 .crt-scanlines::before {
-  content: " ";
-  display: block;
+  content: "";
   position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
+  inset: 0;
   background:
-    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, var(--crt-opacity)) 50%),
-    linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-  z-index: 9999;
+    linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,var(--crt-opacity)) 50%),
+    linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06));
   background-size: 100% 2px, 3px 100%;
   pointer-events: none;
-}
-
-/* === CRT Flicker Overlay === */
-.crt-flicker::after {
-  content: " ";
-  display: block;
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  background: rgba(18, 16, 16, 0.1);
-  opacity: 0;
   z-index: 9999;
-  pointer-events: none;
+}
+
+/* flicker overlay */
+.crt-flicker::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(18,16,16,0.1);
+  opacity: 0;
   animation: flicker 0.15s infinite;
+  pointer-events: none;
+  z-index: 9999;
 }
 
-/* === Random Flicker Intensity === */
 @keyframes flicker {
-  0% {opacity: 0.27861;}
-  20% {opacity: 0.18128;}
-  40% {opacity: 0.84693;}
-  60% {opacity: 0.20313;}
-  80% {opacity: 0.70419;}
-  100% {opacity: 0.24387;}
+  0% {opacity:0.3;} 25% {opacity:0.8;} 50% {opacity:0.1;} 75% {opacity:0.5;} 100% {opacity:0.2;}
 }
 
-/* === Color Separation Flicker === */
+/* color separation */
 .crt-colorsep {
   animation: textShadow 1.6s infinite;
 }
-
 @keyframes textShadow {
-  0% {text-shadow: 0.4px 0 1px rgba(0,30,255,0.5), -0.4px 0 1px rgba(255,0,80,0.3), 0 0 3px;}
-  50% {text-shadow: 3px 0 1px rgba(0,30,255,0.5), -3px 0 1px rgba(255,0,80,0.3), 0 0 3px;}
-  100% {text-shadow: 0.4px 0 1px rgba(0,30,255,0.5), -0.4px 0 1px rgba(255,0,80,0.3), 0 0 3px;}
+  0%,100% {text-shadow: 0.5px 0 1px rgba(0,30,255,0.5), -0.5px 0 1px rgba(255,0,80,0.3);}
+  50% {text-shadow: 3px 0 1px rgba(0,30,255,0.5), -3px 0 1px rgba(255,0,80,0.3);}
 }
