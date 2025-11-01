@@ -15,7 +15,7 @@ import requests
 from datetime import datetime, timedelta
 
 # ---------------------------
-# Safe geopy imports (Geoapify optional)
+# Safe geopy imports
 # ---------------------------
 try:
     from geopy.geocoders import Nominatim, Geoapify
@@ -24,7 +24,6 @@ except ImportError:
     from geopy.geocoders import Nominatim
     Geoapify = None
     GEOAPIFY_AVAILABLE = False
-
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
 
@@ -81,7 +80,7 @@ DICTIONARY_PATH = os.path.join(BASE_DIR, "dictionary.json")
 try:
     with open(DICTIONARY_PATH, "r", encoding="utf-8") as f:
         CUSTOM_LOCATIONS = json.load(f)
-    log(f"📘 Loaded {len(CUSTOM_LOCATIONS)} dictionary entries from dictionary.json")
+    log(f"📘 Loaded {len(CUSTOM_LOCATIONS)} dictionary entries.")
 except Exception:
     CUSTOM_LOCATIONS = {}
 
@@ -92,28 +91,23 @@ except Exception:
 PLACE_REGEX = re.compile(r"\b(?:in|at|near|from)\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*)")
 DATELINE_REGEX = re.compile(r"^\s*([A-Z][A-Z]+|[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)(?:\s*—|,)")
 
-# Updated classifier prompt (more lenient on global impact)
 AI_CLASSIFY_PROMPT = (
-    "You are a geopolitical news classifier. "
+    "You are a geopolitical news classifier.\n"
     "Given a short news title and description, decide:\n"
     "1. show: true or false — should it appear on a global events map?\n"
     "2. topic: one of [geopolitics, finance, tech, disaster, social, science, other]\n"
-    "3. importance: 1–5 (1=very local, 5=major global)\n\n"
+    "3. importance: 1–5 (1=local, 5=major global)\n\n"
     "Always include world affairs, diplomacy, leaders, government policies, wars, military, economy, "
-    "trade, security, or international relations. "
-    "Be inclusive for any story about governments, politics, military, diplomacy, leaders, or global economics. "
-    "Do NOT exclude stories mentioning political figures (e.g., Trump, Xi, Putin). "
+    "trade, security, or international relations.\n"
+    "Be inclusive for any story about governments, politics, military, diplomacy, leaders, or global economics.\n"
+    "Do NOT exclude stories mentioning political figures (e.g., Trump, Xi, Putin).\n"
     "Exclude only entertainment, celebrity gossip, lifestyle, fashion, sports, or recipes.\n\n"
-    "When assigning importance:\n"
-    "- 5 → Anything that affects or could affect world affairs, global business, trade, geopolitics, or major economies. "
-    "(Examples: wars, major diplomatic actions, sanctions, major tech or energy breakthroughs, large corporate or market events)\n"
-    "- 4 → Events with international or national significance that might indirectly influence global trends. "
-    "(Examples: national elections, major policy shifts, protests, significant market movements, or national tech advances)\n"
-    "- 3 → Regional or cross-border relevance (neighboring countries, regional conflicts, or mid-size companies).\n"
-    "- 2 → Local but notable issues with some wider relevance (city-level incidents or crises).\n"
-    "- 1 → Purely regional/provincial/state-level issues that are unlikely to impact beyond their area.\n\n"
-    "If something happens within a single state or province, it is level 1 by default. "
-    "If it can influence international politics, markets, or public opinion in any notable way, rate it at least level 4 or 5.\n\n"
+    "Use this scale for importance:\n"
+    "- 5 = affects or could affect world affairs, global markets, diplomacy, or international security in any decent way.\n"
+    "- 4 = barely affects global affairs or significant foreign relations.\n"
+    "- 3 = national significance (entire country scale).\n"
+    "- 2 = subnational/regional but noteworthy.\n"
+    "- 1 = provincial/state level — anything that happened within a single state or province.\n\n"
     "Return ONLY this exact format (lowercase):\n"
     "show=<true|false>; topic=<topic>; importance=<1-5>"
 )
@@ -131,10 +125,7 @@ AI_LOCATION_PROMPT = (
 try:
     geolocator_nom = Nominatim(user_agent="geomonitor_news_app")
     geolocator_geo = Geoapify(api_key=GEOAPIFY_KEY) if GEOAPIFY_AVAILABLE and GEOAPIFY_KEY else None
-    if geolocator_geo:
-        log("✅ Initialized geocoders: Nominatim + Geoapify fallback.")
-    else:
-        log("✅ Initialized Nominatim geocoder (Geoapify unavailable).")
+    log("✅ Geocoders initialized.")
 except Exception as e:
     raise SystemExit(f"❌ Geocoder init failed: {e}")
 
@@ -188,10 +179,10 @@ def ai_classify_article(article):
         log(f"🧠 AI classify → {raw}")
 
         show = "true" in raw
-        topic = re.search(r"topic=([a-z]+)", raw)
-        topic = topic.group(1) if topic else "other"
-        imp = re.search(r"importance=([1-5])", raw)
-        imp = int(imp.group(1)) if imp else 2
+        topic_match = re.search(r"topic=([a-z]+)", raw)
+        topic = topic_match.group(1) if topic_match else "other"
+        imp_match = re.search(r"importance=([1-5])", raw)
+        imp = int(imp_match.group(1)) if imp_match else 2
 
         CLASSIFY_CACHE[cache_key] = {"show": show, "topic": topic, "importance": imp}
         persist_caches()
@@ -231,7 +222,7 @@ def ai_guess_location(article):
         raw = r.json()["choices"][0]["message"]["content"].strip()
         if not re.search(r"[a-z]", raw.lower()) or len(raw) < 3:
             return None
-        if any(x in raw.lower() for x in ["world", "internet", "global", "earth", "unknown"]):
+        if any(x in raw.lower() for x in ["world", "global", "earth", "unknown"]):
             return None
         log(f"🧠 AI location guess → {raw}")
         return raw
@@ -285,9 +276,9 @@ def fetch_and_process():
         "geopolitics",
         "international relations",
         "war OR conflict",
-        "finance OR stock market OR economic crisis",
-        "technology OR AI OR semiconductor OR cyber attack",
-        "natural disaster OR earthquake OR hurricane",
+        "finance OR economy",
+        "technology OR cyberattack",
+        "disaster OR earthquake OR hurricane",
     ]
     q = " OR ".join(TOPICS)
     url = f"https://newsapi.org/v2/everything?q={requests.utils.quote(q)}&language=en&sortBy=publishedAt&pageSize=30&apiKey={NEWS_API_KEY}"
@@ -303,21 +294,14 @@ def fetch_and_process():
         log(f"❌ News fetch failed: {e}")
         return {}
 
-    bad_words = ["recipe", "bake", "fashion", "celebrity", "music", "sports", "film", "movie", "game", "tv"]
-    # Fixed crash: safely concatenate title/description
-    arts = [
-        a for a in arts
-        if not any(
-            b in ((a.get("title") or "") + (a.get("description") or "")).lower()
-            for b in bad_words
-        )
-    ]
+    bad_words = ["recipe", "fashion", "celebrity", "music", "sports", "movie", "game", "tv"]
+    arts = [a for a in arts if not any(b in (a.get("title","")+a.get("description","")).lower() for b in bad_words)]
     log(f"Filtered down to {len(arts)} articles.")
 
     events = {}
     for i, a in enumerate(arts):
-        title = a.get("title", "")
-        desc = a.get("description", "")
+        title = a.get("title","")
+        desc = a.get("description","")
         log(f"\n[{i+1}/{len(arts)}] {title}")
 
         show, topic, imp = ai_classify_article(a)
@@ -326,7 +310,7 @@ def fetch_and_process():
             continue
 
         loc_hint = None
-        src = (a.get("source") or {}).get("name", "").lower()
+        src = (a.get("source") or {}).get("name","").lower()
         if src in CUSTOM_LOCATIONS:
             loc_hint = CUSTOM_LOCATIONS[src]
 
