@@ -1,263 +1,259 @@
-// ============================================================
-// 🌍 GEOMONITOR FRONTEND CONTROLLER — VERBOSE MODE ENABLED
-// ============================================================
+// app.js — Verbose Geomonitor frontend (uses MAPTILER_KEY injected into index.html)
 
 console.log("🛰️ Geomonitor starting up...");
 
-// -------------------- Global Variables --------------------
+// ------------- Globals -------------
 let map;
 let activeMarkers = {};
-let maptilerKey = null;
-let currentTheme = "dark";
+let tileLayer = null;
+let maptilerKey = typeof MAPTILER_KEY !== "undefined" ? MAPTILER_KEY : null;
+let currentTheme = (document.body.getAttribute("data-theme") || "dark");
+const statusText = () => document.getElementById("status-text");
 
-// Tile layer references (switchable)
-const tileLayers = {
-    dark: null,
-    light: null,
-    satellite: null,
-    solarized: null
-};
+// ------------- Utility helpers -------------
+function logStatus(msg) {
+  try { if (statusText()) statusText().textContent = msg; } catch(e) {}
+  console.log(msg);
+}
+function abort(msg) {
+  console.error(msg);
+  logStatus(msg);
+  throw new Error(msg);
+}
+function escapeHtml(s) {
+  return String(s || "").replace(/[&<>"']/g, (m) => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" })[m]);
+}
+function escapeAttr(s) { return String(s||"").replace(/"/g, "%22"); }
 
-// ============================================================
-// 1️⃣ Load Configuration (config.json)
-// ============================================================
-async function loadConfig() {
-    console.log("⚙️ Attempting to load config.json...");
-    try {
-        const res = await fetch("config.json", { cache: "no-cache" });
-        if (!res.ok) {
-            console.error(`❌ config.json fetch failed: HTTP ${res.status}`);
-            throw new Error(`Config fetch failed with status ${res.status}`);
-        }
+// ------------- verify key is present -------------
+function ensureMapKey() {
+  if (!maptilerKey || maptilerKey.includes("PLACEHOLDER")) {
+    abort("⚠️ MapTiler key missing. Ensure MAPTILER_KEY was injected at deploy time.");
+  } else {
+    console.log("🔒 MapTiler key present (hidden).");
+  }
+}
 
-        const data = await res.json();
-        if (!data.maptiler_key) {
-            throw new Error("⚠️ maptiler_key missing in config.json!");
-        }
-
-        maptilerKey = data.maptiler_key.trim();
-        console.log(`✅ Loaded MapTiler key: ${maptilerKey.slice(0, 8)}********`);
-    } catch (err) {
-        console.error("🔥 Failed to load config.json:", err);
-        alert("⚠️ Could not load map configuration or MapTiler key.\nCheck console for full error log.");
-        throw err;
+// ------------- Tile theme definitions (use MapTiler for solarized + satellite) -------------
+function getTileConfig(key) {
+  // CSP-friendly MapTiler endpoints:
+  const base = "https://api.maptiler.com/maps";
+  return {
+    dark: {
+      name: "Dark",
+      url: `${base}/darkmatter/{z}/{x}/{y}.png?key=${encodeURIComponent(key)}`,
+      attribution: '&copy; OpenStreetMap contributors & MapTiler'
+    },
+    light: {
+      name: "Light",
+      url: `${base}/basic/{z}/{x}/{y}.png?key=${encodeURIComponent(key)}`,
+      attribution: '&copy; OpenStreetMap contributors & MapTiler'
+    },
+    solarized: {
+      name: "Solarized",
+      url: `${base}/solarized-dark/{z}/{x}/{y}.png?key=${encodeURIComponent(key)}`,
+      attribution: '&copy; OpenStreetMap contributors & MapTiler'
+    },
+    satellite: {
+      name: "Satellite",
+      url: `${base}/satellite/{z}/{x}/{y}.jpg?key=${encodeURIComponent(key)}`,
+      attribution: '&copy; OpenStreetMap contributors & MapTiler'
     }
+  };
 }
 
-// ============================================================
-// 2️⃣ Initialize Map
-// ============================================================
-async function initMap() {
-    console.log("🗺️ Initializing map system...");
-    await loadConfig();
-
-    // Define all tile layer URLs
-    const mapTilerBase = `https://api.maptiler.com/maps`;
-    const tileOpts = { tileSize: 512, zoomOffset: -1, crossOrigin: true };
-
-    const urls = {
-        dark: `${mapTilerBase}/darkmatter/{z}/{x}/{y}.png?key=${maptilerKey}`,
-        light: `${mapTilerBase}/basic/{z}/{x}/{y}.png?key=${maptilerKey}`,
-        satellite: `${mapTilerBase}/satellite/{z}/{x}/{y}.jpg?key=${maptilerKey}`,
-        solarized: `${mapTilerBase}/toner/{z}/{x}/{y}.png?key=${maptilerKey}`
-    };
-
-    Object.entries(urls).forEach(([theme, url]) => {
-        tileLayers[theme] = L.tileLayer(url, {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            maxZoom: 12,
-            ...tileOpts
-        });
-        console.log(`🌈 Tile layer registered: ${theme} (${url})`);
-    });
-
-    // Create base map
-    map = L.map('map', {
-        center: [20, 0],
-        zoom: 2,
-        worldCopyJump: true,
-        zoomControl: true,
-        layers: [tileLayers.dark] // default theme
-    });
-
-    console.log("✅ Map initialized successfully.");
-    setupRealtimeListener();
-}
-
-// ============================================================
-// 3️⃣ Firebase Realtime Listener
-// ============================================================
-function setupRealtimeListener() {
-    console.log("📡 Setting up Firebase listener...");
-
-    const dbRef = firebase.database().ref('/events');
-
-    dbRef.on('value', (snapshot) => {
-        const events = snapshot.val();
-        if (!events) {
-            console.warn("⚠️ Firebase returned no events.");
-            return;
-        }
-
-        console.log(`📦 Received ${Object.keys(events).length} events from Firebase.`);
-        renderMarkers(events);
-    }, (error) => {
-        console.error("🔥 Firebase listener error:", error);
-    });
-}
-
-// ============================================================
-// 4️⃣ Render Markers
-// ============================================================
-function renderMarkers(events) {
-    console.log("🧩 Rendering markers...");
-    Object.values(activeMarkers).forEach(({ marker }) => map.removeLayer(marker));
-    activeMarkers = {};
-
-    Object.entries(events).forEach(([key, ev]) => {
-        const { lat, lon, title, description, topic, importance, type, url } = ev;
-        if (!lat || !lon) return;
-
-        const color = getTopicColor(topic);
-        const minZoom = getMinZoomForImportance(importance);
-
-        const marker = L.circleMarker([lat, lon], {
-            radius: 7,
-            color,
-            fillColor: color,
-            fillOpacity: 0.85,
-            weight: 1.5
-        });
-
-        const popupHTML = `
-            <div style="font-family:sans-serif;color:#fff;max-width:250px;">
-                <div class="news-title">${title || "Untitled"}</div>
-                <div class="news-source">${type || "Unknown Source"}</div>
-                <div class="news-topic">Topic: ${topic || "N/A"} | Importance: ${importance || "?"}</div>
-                <div class="news-desc">${description || ""}</div>
-                ${url ? `<a href="${url}" target="_blank" class="news-link">Read full article →</a>` : ""}
-            </div>
-        `;
-
-        marker.bindPopup(popupHTML);
-        activeMarkers[key] = { marker, minZoom };
-        marker.addTo(map);
-    });
-
-    console.log(`✅ Rendered ${Object.keys(activeMarkers).length} markers.`);
-    updateMarkerVisibility();
-    map.on("zoomend", updateMarkerVisibility);
-}
-
-// ============================================================
-// 5️⃣ Marker Visibility Control
-// ============================================================
-function updateMarkerVisibility() {
-    const zoom = map.getZoom();
-    Object.values(activeMarkers).forEach(({ marker, minZoom }) => {
-        if (zoom >= minZoom) {
-            if (!map.hasLayer(marker)) map.addLayer(marker);
-        } else {
-            if (map.hasLayer(marker)) map.removeLayer(marker);
-        }
-    });
-    console.log(`🔍 Updated marker visibility at zoom ${zoom}.`);
-}
-
-// ============================================================
-// 6️⃣ Topic Colors & Importance
-// ============================================================
+// ------------- Theme-aware dot color -------------
 function getTopicColor(topic) {
-    topic = (topic || "").toLowerCase();
-    const theme = document.body.getAttribute("data-theme") || "dark";
+  const t = (topic || "").toLowerCase();
+  const isLight = (currentTheme === "light" || currentTheme === "satellite");
+  const defaultDot = isLight ? "#000000" : "#ffffff";
 
-    const colorsDark = {
-        geopolitics: "red",
-        conflict: "crimson",
-        diplomacy: "darkred",
-        security: "firebrick",
-        economy: "limegreen",
-        finance: "green",
-        technology: "deepskyblue",
-        cyber: "steelblue",
-        science: "dodgerblue",
-        environment: "orange",
-        disaster: "darkorange",
-        energy: "gold",
-        other: "white"
-    };
-
-    const colorsLight = {
-        geopolitics: "#b20000",
-        conflict: "#ff5555",
-        diplomacy: "#b23a3a",
-        security: "#d9534f",
-        economy: "#007700",
-        finance: "#006400",
-        technology: "#0077cc",
-        cyber: "#005fa3",
-        science: "#0066cc",
-        environment: "#ff8c00",
-        disaster: "#ff6600",
-        energy: "#ffaa00",
-        other: "black"
-    };
-
-    const palette = theme === "light" ? colorsLight : colorsDark;
-    return palette[topic] || (theme === "light" ? "black" : "white");
+  if (["geopolitics","conflict","diplomacy","security"].includes(t)) return "#ef4444";
+  if (["economy","finance"].includes(t)) return "#22c55e";
+  if (["technology","cyber","science"].includes(t)) return "#0ea5e9";
+  if (["environment","disaster","energy"].includes(t)) return "#fb923c";
+  return defaultDot;
 }
 
+// ------------- Importance -> min zoom -------------
 function getMinZoomForImportance(importance) {
-    switch (parseInt(importance)) {
-        case 5: return 0;  // global
-        case 4: return 3;
-        case 3: return 5;
-        case 2: return 7;
-        case 1:
-        default: return 9; // local
-    }
+  const imp = parseInt(importance) || 3;
+  switch (imp) {
+    case 5: return 0;
+    case 4: return 3;
+    case 3: return 5;
+    case 2: return 7;
+    default: return 9;
+  }
 }
 
-// ============================================================
-// 7️⃣ Theme System
-// ============================================================
-function switchTheme(theme) {
-    if (!tileLayers[theme]) {
-        console.error(`❌ Unknown theme: ${theme}`);
-        return;
-    }
+// ------------- Initialize map & layers -------------
+function initMap() {
+  logStatus("initializing map...");
+  console.log("🗺️ Initializing map...");
 
-    Object.values(tileLayers).forEach(layer => {
-        if (map.hasLayer(layer)) map.removeLayer(layer);
+  ensureMapKey();
+  const cfg = getTileConfig(maptilerKey);
+
+  map = L.map("map", { preferCanvas: true }).setView([20, 0], 2);
+
+  try {
+    tileLayer = L.tileLayer(cfg[currentTheme].url, { attribution: cfg[currentTheme].attribution, maxZoom: 12 }).addTo(map);
+    console.log(`🧭 Added initial tile layer: ${currentTheme}`);
+  } catch (err) {
+    console.error("Tile layer init failed:", err);
+  }
+
+  setupRealtimeListener();
+  setupPanelControls(cfg);
+  logStatus("map initialized, listening for events");
+}
+
+// ------------- Realtime Firebase listener -------------
+function setupRealtimeListener() {
+  logStatus("connecting to Firebase...");
+  console.log("📡 Connecting to Firebase Realtime DB...");
+
+  const dbRef = firebase.database().ref("/events");
+  dbRef.on("value", (snap) => {
+    const events = snap.val();
+    if (!events) {
+      console.warn("⚠️ No events returned from Firebase.");
+      logStatus("no events");
+      return;
+    }
+    console.log(`📦 Firebase returned ${Object.keys(events).length} events.`);
+    renderMarkers(events);
+  }, (err) => {
+    console.error("Firebase listener error:", err);
+    logStatus("firebase error (see console)");
+  });
+}
+
+// ------------- Render markers -------------
+function renderMarkers(events) {
+  // clear old markers
+  Object.values(activeMarkers).forEach(({ marker }) => {
+    if (map.hasLayer(marker)) map.removeLayer(marker);
+  });
+  activeMarkers = {};
+
+  Object.entries(events).forEach(([k, e]) => {
+    if (!e || !e.lat || !e.lon) return;
+    const color = getTopicColor(e.topic);
+    const minZoom = getMinZoomForImportance(e.importance);
+
+    const marker = L.circleMarker([e.lat, e.lon], {
+      radius: 7, color, fillColor: color, fillOpacity: 0.85, weight: 1.5
     });
+    marker.options._topic = e.topic || "other";
 
-    map.addLayer(tileLayers[theme]);
-    document.body.setAttribute("data-theme", theme);
-    currentTheme = theme;
+    const popup = `
+      <div style="font-family:system-ui, sans-serif; color:inherit; max-width:260px;">
+        <div style="font-weight:700">${escapeHtml(e.title || "Untitled")}</div>
+        <div style="font-size:12px;color:grey">${escapeHtml(e.type || "Source")}</div>
+        <div style="margin:6px 0;font-size:13px;color:grey">Topic: ${escapeHtml(e.topic || "N/A")} | Importance: ${escapeHtml(e.importance ? String(e.importance) : "?")}</div>
+        <div style="font-size:13px">${escapeHtml(e.description || "")}</div>
+        ${e.url ? `<div style="margin-top:8px;"><a href="${escapeAttr(e.url)}" target="_blank" rel="noopener noreferrer">Read →</a></div>` : ""}
+      </div>
+    `;
+    marker.bindPopup(popup);
+    activeMarkers[k] = { marker, minZoom };
+    marker.addTo(map);
+  });
 
-    console.log(`🌗 Theme switched → ${theme}`);
+  console.log(`✅ Rendered ${Object.keys(activeMarkers).length} markers.`);
+  updateMarkerVisibility();
+  logStatus(`${Object.keys(activeMarkers).length} events displayed`);
 }
 
-// ============================================================
-// 8️⃣ Init everything
-// ============================================================
-document.addEventListener("DOMContentLoaded", async () => {
-    console.log("🚀 DOM loaded. Launching Geomonitor...");
-    try {
-        await initMap();
-        console.log("✅ Geomonitor fully initialized!");
-    } catch (e) {
-        console.error("💥 Fatal error during initialization:", e);
-    }
-
-    // Theme selector event
-    const themeMenu = document.getElementById("themeMenu");
-    if (themeMenu) {
-        themeMenu.addEventListener("change", (e) => {
-            switchTheme(e.target.value);
-        });
-        console.log("🎛️ Theme selector initialized.");
+// ------------- Visibility control -------------
+function updateMarkerVisibility() {
+  const zoom = map.getZoom();
+  Object.values(activeMarkers).forEach(({ marker, minZoom }) => {
+    if (zoom >= minZoom) {
+      if (!map.hasLayer(marker)) map.addLayer(marker);
     } else {
-        console.warn("⚠️ No theme selector found in DOM.");
+      if (map.hasLayer(marker)) map.removeLayer(marker);
     }
+  });
+  console.log(`🔍 Marker visibility updated at zoom ${zoom}`);
+}
+
+// ------------- Change theme & recolor markers -------------
+function changeTheme(theme, cfg) {
+  if (!cfg[theme]) { console.warn("Unknown theme:", theme); return; }
+  currentTheme = theme;
+  document.body.setAttribute("data-theme", theme);
+
+  if (tileLayer) try { map.removeLayer(tileLayer); } catch(e) {}
+  tileLayer = L.tileLayer(cfg[theme].url, { attribution: cfg[theme].attribution, maxZoom: 12 }).addTo(map);
+  console.log(`🎨 Theme switched to ${theme}`);
+
+  // recolor markers according to new theme
+  Object.values(activeMarkers).forEach(({ marker }) => {
+    const t = marker.options._topic || "other";
+    const c = getTopicColor(t);
+    marker.setStyle({ color: c, fillColor: c });
+  });
+  logStatus(`theme: ${theme}`);
+}
+
+// ------------- Control panel wiring -------------
+function setupPanelControls(cfg) {
+  // ensure controls exist (index.html contains them)
+  const toggle = document.getElementById("gm-panel-toggle");
+  const panel = document.getElementById("gm-panel");
+  const selector = document.getElementById("gm-theme-selector");
+  const slider = document.getElementById("crt-intensity");
+
+  if (!toggle || !panel || !selector || !slider) {
+    console.warn("Control panel elements missing in DOM.");
+    return;
+  }
+
+  // toggle open/close robustly
+  function togglePanel(e) {
+    e && e.stopPropagation && e.stopPropagation();
+    const hidden = panel.classList.toggle("gm-hidden");
+    toggle.setAttribute("aria-expanded", (!hidden).toString());
+  }
+  ["pointerdown","click","touchstart"].forEach(ev => toggle.addEventListener(ev, togglePanel, { passive:false }));
+
+  // init selector
+  selector.value = currentTheme;
+  selector.addEventListener("change", (e) => changeTheme(e.target.value, cfg));
+
+  // init slider (CRT)
+  const stored = parseFloat(localStorage.getItem("gm_crt") || "0.45");
+  slider.value = stored;
+  document.documentElement.style.setProperty("--crt-opacity", stored);
+  slider.addEventListener("input", (e) => {
+    const v = e.target.value;
+    document.documentElement.style.setProperty("--crt-opacity", v);
+    localStorage.setItem("gm_crt", String(v));
+  });
+
+  // clicking outside closes
+  document.addEventListener("pointerdown", (ev) => {
+    if (!panel.contains(ev.target) && !toggle.contains(ev.target)) {
+      if (!panel.classList.contains("gm-hidden")) {
+        panel.classList.add("gm-hidden");
+        toggle.setAttribute("aria-expanded", "false");
+      }
+    }
+  }, { passive: true });
+
+  console.log("🧭 Control panel wired.");
+}
+
+// ------------- DOM ready: start -------------
+document.addEventListener("DOMContentLoaded", () => {
+  try {
+    logStatus("loading...");
+    initMap();
+  } catch (err) {
+    console.error("Fatal initialization error:", err);
+    logStatus("initialization failed — see console");
+  }
 });
