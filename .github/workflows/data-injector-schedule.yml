@@ -16,7 +16,7 @@ jobs:
       - name: Inject MapTiler key
         run: |
           mkdir -p dist
-          sed "s|YOUR_MAPTILER_API_KEY_HERE|${{ secrets.MAPTILER_KEY }}|" index.html > dist/index.html
+          sed "s|YOUR_MAPTILER_API_KEY_HERE|${{ secrets.MAPTILER_KEY }}|g" index.html > dist/index.html
           cp app.js style.css crt.css dist/
 
       - name: Deploy
