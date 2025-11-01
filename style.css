@@ -1,34 +1,64 @@
+/* ============================
+   🌍 GEOMONITOR STYLES
+   ============================ */
+
 body {
   margin: 0;
+  padding: 0;
   font-family: "Inter", system-ui, sans-serif;
   transition: background-color 0.3s, color 0.3s;
 }
 
+/* === Dark & Light Modes === */
 body.dark {
-  background: #0d1117;
+  background-color: #0d1117;
   color: #f3f4f6;
 }
 
 body.light {
-  background: #f3f4f6;
+  background-color: #f3f4f6;
   color: #111827;
 }
 
+/* Map container fills viewport */
 #map {
   height: 100vh;
   width: 100vw;
 }
 
+/* ============================
+   Popup Styles
+   ============================ */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--popup-bg, #1f2937);
+  color: var(--popup-fg, #f3f4f6);
+  border-radius: 8px;
+  border: 1px solid #374151;
+}
+
+body.light .leaflet-popup-content-wrapper,
+body.light .leaflet-popup-tip {
+  background: #ffffff;
+  color: #111827;
+  border-color: #9ca3af;
+}
+
+/* ============================
+   Control Panel (Bottom Right)
+   ============================ */
 #control-panel {
   position: absolute;
   bottom: 15px;
   right: 15px;
   z-index: 1000;
   font-size: 14px;
+  text-align: left;
 }
 
+/* Toggle button (hamburger) */
 #panel-toggle {
-  background: #1f2937;
+  background-color: #1f2937;
   color: #f3f4f6;
   border: 1px solid #374151;
   border-radius: 8px;
@@ -37,9 +67,24 @@ body.light {
   font-weight: 600;
 }
 
+#panel-toggle:hover {
+  background-color: #374151;
+}
+
+body.light #panel-toggle {
+  background-color: #e5e7eb;
+  color: #111827;
+  border-color: #9ca3af;
+}
+
+body.light #panel-toggle:hover {
+  background-color: #d1d5db;
+}
+
+/* Panel box */
 #panel {
   margin-top: 8px;
-  background: #1f2937;
+  background-color: #1f2937;
   padding: 10px 14px;
   border-radius: 10px;
   border: 1px solid #374151;
@@ -47,37 +92,89 @@ body.light {
   width: 230px;
 }
 
-.hidden { display: none; }
-
-#panel h4 { margin: 0 0 6px 0; font-size: 14px; }
-
-#panel ul { list-style: none; padding: 0; margin: 0; }
-#panel li { display: flex; align-items: center; margin-bottom: 4px; }
-
-.dot {
-  display: inline-block; width: 12px; height: 12px;
-  border-radius: 50%; margin-right: 8px;
+body.light #panel {
+  background-color: #ffffff;
+  color: #111827;
+  border-color: #d1d5db;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
+
+/* Hide panel */
+.hidden {
+  display: none;
+}
+
+/* Header + List */
+#panel h4 {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+#panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#panel li {
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+}
+
+/* Topic dots */
+.dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
 .dot.red { background: red; }
 .dot.green { background: limegreen; }
 .dot.blue { background: deepskyblue; }
 .dot.orange { background: orange; }
 .dot.white { background: white; }
 
-#panel button, #panel input {
-  width: 100%; margin-top: 8px;
+/* Make white dots visible in light mode */
+body.light .dot.white {
+  background: black;
 }
 
+/* Buttons inside panel */
 #panel button {
+  width: 100%;
+  margin-top: 8px;
   border: 1px solid #374151;
   border-radius: 8px;
   padding: 6px 10px;
   cursor: pointer;
-  background: #111827;
-  color: #f3f4f6;
+  font-size: 13px;
   font-weight: 600;
+  background-color: #111827;
+  color: #f3f4f6;
+  transition: background-color 0.2s;
 }
 
+#panel button:hover {
+  background-color: #374151;
+}
+
+body.light #panel button {
+  background-color: #e5e7eb;
+  color: #111827;
+  border-color: #9ca3af;
+}
+
+body.light #panel button:hover {
+  background-color: #d1d5db;
+}
+
+/* ============================
+   CRT Intensity Slider
+   ============================ */
 #panel label {
   display: block;
   margin-top: 10px;
@@ -86,5 +183,80 @@ body.light {
 }
 
 #crt-intensity {
+  width: 100%;
   accent-color: #22c55e;
+  margin-top: 4px;
+  cursor: pointer;
+}
+
+#crt-intensity:focus {
+  outline: none;
+}
+
+/* ============================
+   CRT EFFECTS (from aleclownes)
+   ============================ */
+.crt-scanlines::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+              linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  z-index: 2;
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+  opacity: var(--crt-opacity, 0.4);
+}
+
+.crt-flicker::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: rgba(18, 16, 16, 0.1);
+  opacity: 0;
+  z-index: 2;
+  pointer-events: none;
+  animation: flicker 0.15s infinite;
+}
+
+@keyframes flicker {
+  0% {opacity: 0.27861;}
+  5% {opacity: 0.34769;}
+  10% {opacity: 0.23604;}
+  15% {opacity: 0.90626;}
+  20% {opacity: 0.18128;}
+  25% {opacity: 0.83891;}
+  30% {opacity: 0.65583;}
+  35% {opacity: 0.67807;}
+  40% {opacity: 0.26559;}
+  45% {opacity: 0.84693;}
+  50% {opacity: 0.96019;}
+  55% {opacity: 0.08594;}
+  60% {opacity: 0.20313;}
+  65% {opacity: 0.71988;}
+  70% {opacity: 0.53455;}
+  75% {opacity: 0.37288;}
+  80% {opacity: 0.71428;}
+  85% {opacity: 0.70419;}
+  90% {opacity: 0.7003;}
+  95% {opacity: 0.36108;}
+  100% {opacity: 0.24387;}
+}
+
+/* Text color separation flicker */
+.crt-colorsep {
+  animation: textShadow 1.6s infinite;
+}
+
+@keyframes textShadow {
+  0% {text-shadow: 0.4px 0 1px rgba(0,30,255,0.5), -0.4px 0 1px rgba(255,0,80,0.3), 0 0 3px;}
+  100% {text-shadow: 2.6px 0 1px rgba(0,30,255,0.5), -2.6px 0 1px rgba(255,0,80,0.3), 0 0 3px;}
 }
