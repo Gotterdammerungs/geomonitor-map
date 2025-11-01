@@ -1,51 +1,32 @@
-name: Geomonitor Data Injector & Deploy
+name: 🚀 Deploy Geomonitor to GitHub Pages
 
 on:
-  schedule:
-    - cron: '*/5 * * * *'
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
+permissions:
+  contents: write  # Needed for gh-pages deploy
+
 jobs:
-  inject_and_deploy:
+  build-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repo
-      - name: Checkout repository
+      - name: 🧾 Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-
-      # 3️⃣ Install dependencies
-      - name: Install Python dependencies
-        run: pip install requests geopy python-dotenv
-
-      # 4️⃣ Run data injector
-      - name: Run data injector
-        env:
-          FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
-          NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
-          GEOAPIFY_KEY: ${{ secrets.GEOAPIFY_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-        run: python data_injector.py
-
-      # 5️⃣ Inject MapTiler key into index.html
-      - name: Inject MapTiler Key
-        env:
-          MAPTILER_KEY: ${{ secrets.MAPTILER_KEY }}
+      - name: 🏗️ Build static site with MapTiler key injected
         run: |
-          echo "🔑 Injecting MapTiler key into index.html..."
-          sed -i "s|MAPTILER_KEY_PLACEHOLDER|${MAPTILER_KEY}|g" index.html
-          grep "MAPTILER_KEY" index.html || echo "⚠️ MapTiler key not found after injection."
+          mkdir -p dist
+          echo "Injecting MAPTILER_KEY into index.html..."
+          sed 's|YOUR_MAPTILER_API_KEY_HERE|'${{ secrets.MAPTILER_KEY }}'|' index.html > dist/index.html
+          cp app.js style.css dist/
 
-      # 6️⃣ Deploy to GitHub Pages
-      - name: Deploy to GitHub Pages
+      - name: 🚀 Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
           publish_branch: gh-pages
-          publish_dir: ./
