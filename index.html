@@ -1,24 +1,32 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Geomonitor</title>
 
   <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="crt.css" />
 
-  <!-- Firebase -->
+  <!-- Firebase (v8 used previously in your project) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <script>
-    var firebaseConfig = {
+    // ---------- IMPORTANT ----------
+    // This placeholder will be replaced by the GitHub Actions workflow
+    // at deploy time with your real MapTiler key.
+    const MAPTILER_KEY = "MAPTILER_KEY_PLACEHOLDER";
+  </script>
+
+  <script>
+    // Minimal Firebase init (use your config or keep this)
+    const firebaseConfig = {
       apiKey: "AIzaSyDtdaS3UfXUokfyQme9r-w52bMalq1aIhU",
       authDomain: "geomonitor-2025.firebaseapp.com",
       databaseURL: "https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app",
@@ -29,31 +37,36 @@
       measurementId: "G-2VQE4SDRF3"
     };
     firebase.initializeApp(firebaseConfig);
-    firebase.auth().signInAnonymously().catch(err => console.error(err.message));
+    firebase.auth().signInAnonymously().catch(err => console.warn("Firebase auth:", err && err.message));
   </script>
 </head>
-
-<body class="dark crt-scanlines crt-flicker crt-colorsep">
+<body class="crt-scanlines crt-flicker crt-colorsep" data-theme="dark">
   <div id="map"></div>
 
-  <div id="control-panel">
-    <button id="panel-toggle">☰</button>
-    <div id="panel" class="hidden">
-      <h4>🗺️ Topic Legend</h4>
-      <ul>
-        <li><span class="dot red"></span> Geopolitics / Security</li>
-        <li><span class="dot green"></span> Finance / Economy</li>
-        <li><span class="dot blue"></span> Technology / Science</li>
-        <li><span class="dot orange"></span> Environment / Disaster</li>
-        <li><span class="dot white"></span> Other / Uncategorized</li>
-      </ul>
-      <hr>
-      <label for="crt-intensity">📺 CRT Intensity</label>
-      <input id="crt-intensity" type="range" min="0" max="1" step="0.05" value="0.5">
-      <button id="theme-toggle">🌙 Dark Mode</button>
+  <!-- Control panel (bottom-right) -->
+  <div id="gm-control-panel" aria-hidden="false">
+    <button id="gm-panel-toggle" aria-expanded="false">☰</button>
+    <div id="gm-panel" class="gm-hidden" role="dialog" aria-hidden="true">
+      <h4>🗺️ Map Themes</h4>
+
+      <label for="gm-theme-selector">Theme</label>
+      <select id="gm-theme-selector" aria-label="Select map theme">
+        <option value="dark" selected>Dark</option>
+        <option value="light">Light</option>
+        <option value="solarized">Solarized</option>
+        <option value="satellite">Satellite</option>
+      </select>
+
+      <label for="crt-intensity" style="margin-top:10px;">📺 CRT Intensity</label>
+      <input id="crt-intensity" type="range" min="0" max="1" step="0.05" value="0.45">
+
+      <div id="status" style="margin-top:10px;font-size:13px;color:#bfc7ce;">
+        Status: <span id="status-text">idle</span>
+      </div>
     </div>
   </div>
 
+  <!-- App JS (verbose) -->
   <script src="app.js"></script>
 </body>
 </html>
