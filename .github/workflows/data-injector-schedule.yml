@@ -1,14 +1,14 @@
-name: Geomonitor Data Injector + Web Deploy
+name: Geomonitor — Data Injector & Web Deploy
 
 on:
   schedule:
-    # Runs every 5 minutes
+    # ⏰ Runs every 5 minutes
     - cron: "*/5 * * * *"
   workflow_dispatch:
 
 jobs:
   run_data_injector:
-    name: 🧠 Data Injector
+    name: 🧠 Run Data Injector
     runs-on: ubuntu-latest
 
     steps:
@@ -31,9 +31,9 @@ jobs:
           GEOAPIFY_KEY: ${{ secrets.GEOAPIFY_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
-          echo "=== Running Geomonitor Data Injector ==="
+          echo "=== 🧠 Running Geomonitor Data Injector ==="
           python data_injector.py
-          echo "=== Data Injection Complete ==="
+          echo "=== ✅ Data Injection Complete ==="
 
   deploy_to_pages:
     name: 🌍 Deploy Web App
@@ -51,7 +51,7 @@ jobs:
       - name: 🧰 Install dependencies for key injection
         run: sudo apt-get update && sudo apt-get install -y perl
 
-      - name: 🔑 Inject MapTiler key
+      - name: 🔑 Inject MapTiler API key
         env:
           MAPTILER_KEY: ${{ secrets.MAPTILER_KEY }}
         run: |
@@ -61,7 +61,6 @@ jobs:
             exit 1
           fi
 
-          # Make sure index.html exists
           if [ ! -f index.html ]; then
             echo "❌ ERROR: index.html not found!"
             exit 1
@@ -84,5 +83,5 @@ jobs:
           publish_dir: ./public
           commit_message: "🚀 Deploy Geomonitor frontend"
 
-      - name: ✅ Done
+      - name: ✅ Deployment Complete
         run: echo "🎉 Deployment complete! View at: https://gotterdammerungs.github.io/geomonitor-map/"
