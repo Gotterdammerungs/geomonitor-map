@@ -92,17 +92,28 @@ except Exception:
 PLACE_REGEX = re.compile(r"\b(?:in|at|near|from)\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*)")
 DATELINE_REGEX = re.compile(r"^\s*([A-Z][A-Z]+|[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)(?:\s*—|,)")
 
+# Updated classifier prompt (more lenient on global impact)
 AI_CLASSIFY_PROMPT = (
     "You are a geopolitical news classifier. "
     "Given a short news title and description, decide:\n"
     "1. show: true or false — should it appear on a global events map?\n"
     "2. topic: one of [geopolitics, finance, tech, disaster, social, science, other]\n"
-    "3. importance: 1–5 (1=local, 5=major global)\n\n"
+    "3. importance: 1–5 (1=very local, 5=major global)\n\n"
     "Always include world affairs, diplomacy, leaders, government policies, wars, military, economy, "
     "trade, security, or international relations. "
     "Be inclusive for any story about governments, politics, military, diplomacy, leaders, or global economics. "
     "Do NOT exclude stories mentioning political figures (e.g., Trump, Xi, Putin). "
     "Exclude only entertainment, celebrity gossip, lifestyle, fashion, sports, or recipes.\n\n"
+    "When assigning importance:\n"
+    "- 5 → Anything that affects or could affect world affairs, global business, trade, geopolitics, or major economies. "
+    "(Examples: wars, major diplomatic actions, sanctions, major tech or energy breakthroughs, large corporate or market events)\n"
+    "- 4 → Events with international or national significance that might indirectly influence global trends. "
+    "(Examples: national elections, major policy shifts, protests, significant market movements, or national tech advances)\n"
+    "- 3 → Regional or cross-border relevance (neighboring countries, regional conflicts, or mid-size companies).\n"
+    "- 2 → Local but notable issues with some wider relevance (city-level incidents or crises).\n"
+    "- 1 → Purely regional/provincial/state-level issues that are unlikely to impact beyond their area.\n\n"
+    "If something happens within a single state or province, it is level 1 by default. "
+    "If it can influence international politics, markets, or public opinion in any notable way, rate it at least level 4 or 5.\n\n"
     "Return ONLY this exact format (lowercase):\n"
     "show=<true|false>; topic=<topic>; importance=<1-5>"
 )
@@ -293,13 +304,20 @@ def fetch_and_process():
         return {}
 
     bad_words = ["recipe", "bake", "fashion", "celebrity", "music", "sports", "film", "movie", "game", "tv"]
-    arts = [a for a in arts if not any(b in (a.get("title","")+a.get("description","")).lower() for b in bad_words)]
+    # Fixed crash: safely concatenate title/description
+    arts = [
+        a for a in arts
+        if not any(
+            b in ((a.get("title") or "") + (a.get("description") or "")).lower()
+            for b in bad_words
+        )
+    ]
     log(f"Filtered down to {len(arts)} articles.")
 
     events = {}
     for i, a in enumerate(arts):
-        title = a.get("title","")
-        desc = a.get("description","")
+        title = a.get("title", "")
+        desc = a.get("description", "")
         log(f"\n[{i+1}/{len(arts)}] {title}")
 
         show, topic, imp = ai_classify_article(a)
@@ -308,7 +326,7 @@ def fetch_and_process():
             continue
 
         loc_hint = None
-        src = (a.get("source") or {}).get("name","").lower()
+        src = (a.get("source") or {}).get("name", "").lower()
         if src in CUSTOM_LOCATIONS:
             loc_hint = CUSTOM_LOCATIONS[src]
 
