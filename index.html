@@ -1,23 +1,24 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Geomonitor</title>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Geomonitor</title>
 
-  <!-- Leaflet (Map Library) -->
+  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- External Styles -->
+  <!-- Styles -->
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="crt.css" />
 
-  <!-- Firebase v8 -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <script>
-    // 🔹 Replace this with your actual Firebase config
     var firebaseConfig = {
       apiKey: "AIzaSyDtdaS3UfXUokfyQme9r-w52bMalq1aIhU",
       authDomain: "geomonitor-2025.firebaseapp.com",
@@ -35,14 +36,13 @@
   </script>
 </head>
 
-<body>
-  <!-- Map -->
+<body class="dark crt">
   <div id="map"></div>
 
-  <!-- Legend (togglable) -->
-  <div id="legend-container">
-    <button id="legend-toggle">☰ Legend</button>
-    <div id="legend" class="hidden">
+  <!-- Control panel (bottom-right) -->
+  <div id="control-panel">
+    <button id="panel-toggle">☰</button>
+    <div id="panel" class="hidden">
       <h4>🗺️ Topic Legend</h4>
       <ul>
         <li><span class="dot red"></span> Geopolitics / Security</li>
@@ -51,10 +51,12 @@
         <li><span class="dot orange"></span> Environment / Disaster</li>
         <li><span class="dot white"></span> Other / Uncategorized</li>
       </ul>
+      <hr>
+      <button id="crt-toggle">🧠 CRT Mode: ON</button>
+      <button id="theme-toggle">🌙 Dark Mode</button>
     </div>
   </div>
 
-  <!-- Map Logic -->
   <script src="app.js"></script>
 </body>
 </html>
