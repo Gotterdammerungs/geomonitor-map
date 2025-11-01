@@ -28,37 +28,36 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: python data_injector.py
 
-      # Create config.json containing the MapTiler key
-      - name: Create map config
-        run: |
-          echo "{\"maptiler_key\": \"${{ secrets.MAPTILER_KEY }}\"}" > config.json
-          cat config.json
-
-      - name: Upload config.json artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: site-config
-          path: config.json
-
   deploy_site:
-    name: 🌐 Deploy to GitHub Pages
-    needs: run_injector
+    name: 🌐 Deploy Website to GitHub Pages
     runs-on: ubuntu-latest
+    needs: run_injector
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download config.json
-        uses: actions/download-artifact@v4
-        with:
-          name: site-config
+      # ✅ Create config.json *in the repo root* (where index.html is)
+      - name: Create map config
+        run: |
+          echo "{\"maptiler_key\": \"${{ secrets.MAPTILER_KEY }}\"}" > ./config.json
+          echo "✅ Created config.json with MapTiler key"
+          cat config.json
 
-      - name: Verify config.json
-        run: cat config.json
+      # ✅ Verify that the file exists before deploy
+      - name: Verify config file
+        run: |
+          if [ ! -f "./config.json" ]; then
+            echo "❌ config.json not found in root!"
+            exit 1
+          fi
+          echo "✅ config.json exists in $(pwd)"
 
-      - name: Deploy all files (including config.json)
+      # ✅ Deploy everything to gh-pages (root directory)
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./
+          keep_files: false
+          force_orphan: false
