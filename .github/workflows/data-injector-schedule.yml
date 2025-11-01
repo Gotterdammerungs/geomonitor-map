@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write   # ✅ This gives permission to push to gh-pages
+  contents: write
 
 jobs:
   inject_data_to_firebase:
@@ -31,6 +31,19 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: python data_injector.py
 
+      # 1️⃣ Create config.json and upload as artifact
+      - name: Create config.json
+        run: |
+          echo "{\"maptiler_key\": \"${{ secrets.MAPTILER_KEY }}\"}" > config.json
+          cat config.json
+        shell: bash
+
+      - name: Upload config.json for deploy job
+        uses: actions/upload-artifact@v4
+        with:
+          name: config
+          path: config.json
+
   build_and_deploy:
     name: 🌐 Build & Deploy Frontend (GitHub Pages)
     runs-on: ubuntu-latest
@@ -39,13 +52,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 1️⃣ Generate config.json securely in repo root
-      - name: Create config.json securely
-        run: |
-          echo "{\"maptiler_key\": \"${{ secrets.MAPTILER_KEY }}\"}" > config.json
-          echo "✅ config.json created in repo root"
+      # 2️⃣ Download the config.json from previous job
+      - name: Download config.json
+        uses: actions/download-artifact@v4
+        with:
+          name: config
 
-      # 2️⃣ Deploy to GitHub Pages
+      # 3️⃣ Confirm it’s here (for debugging)
+      - name: Verify config.json presence
+        run: cat config.json
+
+      # 4️⃣ Deploy everything (including config.json)
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
