@@ -1,223 +1,263 @@
-// app.js — Secure Geomonitor with CRT effects, theme selector, and MapTiler integration
+// ============================================================
+// 🌍 GEOMONITOR FRONTEND CONTROLLER — VERBOSE MODE ENABLED
+// ============================================================
 
-let activeMarkers = {};
+console.log("🛰️ Geomonitor starting up...");
+
+// -------------------- Global Variables --------------------
 let map;
-let tileLayer = null;
-let currentTheme = localStorage.getItem("gm_theme") || "dark";
-let TILE_THEMES = {};
+let activeMarkers = {};
+let maptilerKey = null;
+let currentTheme = "dark";
 
-// ======= Load MapTiler key from config.json =======
+// Tile layer references (switchable)
+const tileLayers = {
+    dark: null,
+    light: null,
+    satellite: null,
+    solarized: null
+};
+
+// ============================================================
+// 1️⃣ Load Configuration (config.json)
+// ============================================================
 async function loadConfig() {
-  try {
-    const res = await fetch("config.json");
-    const cfg = await res.json();
-    const key = cfg.maptiler_key;
-    if (!key) throw new Error("Missing maptiler_key");
+    console.log("⚙️ Attempting to load config.json...");
+    try {
+        const res = await fetch("config.json", { cache: "no-cache" });
+        if (!res.ok) {
+            console.error(`❌ config.json fetch failed: HTTP ${res.status}`);
+            throw new Error(`Config fetch failed with status ${res.status}`);
+        }
 
-    TILE_THEMES = {
-      dark: {
-        name: "Dark",
-        url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-      },
-      light: {
-        name: "Light",
-        url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-      },
-      solarized: {
-        name: "Solarized",
-        url: `https://api.maptiler.com/maps/solarized-dark/{z}/{x}/{y}.png?key=${encodeURIComponent(key)}`,
-        attribution: '&copy; OpenStreetMap contributors & MapTiler',
-      },
-      satellite: {
-        name: "Satellite",
-        url: `https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${encodeURIComponent(key)}`,
-        attribution: '&copy; OpenStreetMap contributors & MapTiler',
-      },
+        const data = await res.json();
+        if (!data.maptiler_key) {
+            throw new Error("⚠️ maptiler_key missing in config.json!");
+        }
+
+        maptilerKey = data.maptiler_key.trim();
+        console.log(`✅ Loaded MapTiler key: ${maptilerKey.slice(0, 8)}********`);
+    } catch (err) {
+        console.error("🔥 Failed to load config.json:", err);
+        alert("⚠️ Could not load map configuration or MapTiler key.\nCheck console for full error log.");
+        throw err;
+    }
+}
+
+// ============================================================
+// 2️⃣ Initialize Map
+// ============================================================
+async function initMap() {
+    console.log("🗺️ Initializing map system...");
+    await loadConfig();
+
+    // Define all tile layer URLs
+    const mapTilerBase = `https://api.maptiler.com/maps`;
+    const tileOpts = { tileSize: 512, zoomOffset: -1, crossOrigin: true };
+
+    const urls = {
+        dark: `${mapTilerBase}/darkmatter/{z}/{x}/{y}.png?key=${maptilerKey}`,
+        light: `${mapTilerBase}/basic/{z}/{x}/{y}.png?key=${maptilerKey}`,
+        satellite: `${mapTilerBase}/satellite/{z}/{x}/{y}.jpg?key=${maptilerKey}`,
+        solarized: `${mapTilerBase}/toner/{z}/{x}/{y}.png?key=${maptilerKey}`
     };
 
-    initMap();
-  } catch (err) {
-    console.error("Failed to load config.json:", err);
-    alert("⚠️ Could not load map configuration or MapTiler key.");
-  }
+    Object.entries(urls).forEach(([theme, url]) => {
+        tileLayers[theme] = L.tileLayer(url, {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            maxZoom: 12,
+            ...tileOpts
+        });
+        console.log(`🌈 Tile layer registered: ${theme} (${url})`);
+    });
+
+    // Create base map
+    map = L.map('map', {
+        center: [20, 0],
+        zoom: 2,
+        worldCopyJump: true,
+        zoomControl: true,
+        layers: [tileLayers.dark] // default theme
+    });
+
+    console.log("✅ Map initialized successfully.");
+    setupRealtimeListener();
 }
 
-// ======= Initialize Map =======
-function initMap() {
-  map = L.map("map", { preferCanvas: true }).setView([20, 0], 2);
-  ensureCrtClasses();
-
-  const theme = TILE_THEMES[currentTheme] || TILE_THEMES.dark;
-  tileLayer = L.tileLayer(theme.url, {
-    attribution: theme.attribution,
-    maxZoom: 12,
-  }).addTo(map);
-
-  setupRealtimeListener();
-  createControlPanel();
-
-  const stored = parseFloat(localStorage.getItem("gm_crt") || "0.45");
-  document.documentElement.style.setProperty("--crt-opacity", stored);
-}
-
-// ======= CRT Classes =======
-function ensureCrtClasses() {
-  const body = document.body;
-  ["crt-scanlines", "crt-flicker", "crt-colorsep"].forEach(cls => {
-    if (!body.classList.contains(cls)) body.classList.add(cls);
-  });
-}
-
-// ======= Marker Colors (auto theme aware) =======
-function getTopicColor(topic) {
-  const t = (topic || "").toLowerCase();
-  const isLight = currentTheme === "light" || currentTheme === "satellite";
-  const defaultDot = isLight ? "#000" : "#fff";
-
-  if (["geopolitics", "conflict", "diplomacy", "security"].includes(t)) return "#ef4444";
-  if (["economy", "finance"].includes(t)) return "#22c55e";
-  if (["technology", "cyber", "science"].includes(t)) return "#0ea5e9";
-  if (["environment", "disaster", "energy"].includes(t)) return "#fb923c";
-  return defaultDot;
-}
-
-// ======= Marker Visibility by Zoom =======
-function getMinZoomForImportance(importance) {
-  const imp = parseInt(importance) || 3;
-  switch (imp) {
-    case 5: return 0;
-    case 4: return 3;
-    case 3: return 5;
-    case 2: return 7;
-    default: return 9;
-  }
-}
-
-// ======= Firebase Realtime Listener =======
+// ============================================================
+// 3️⃣ Firebase Realtime Listener
+// ============================================================
 function setupRealtimeListener() {
-  const dbRef = firebase.database().ref("/events");
-  const clearMarkers = () => {
-    Object.values(activeMarkers).forEach(({ marker }) => {
-      if (map.hasLayer(marker)) map.removeLayer(marker);
+    console.log("📡 Setting up Firebase listener...");
+
+    const dbRef = firebase.database().ref('/events');
+
+    dbRef.on('value', (snapshot) => {
+        const events = snapshot.val();
+        if (!events) {
+            console.warn("⚠️ Firebase returned no events.");
+            return;
+        }
+
+        console.log(`📦 Received ${Object.keys(events).length} events from Firebase.`);
+        renderMarkers(events);
+    }, (error) => {
+        console.error("🔥 Firebase listener error:", error);
     });
+}
+
+// ============================================================
+// 4️⃣ Render Markers
+// ============================================================
+function renderMarkers(events) {
+    console.log("🧩 Rendering markers...");
+    Object.values(activeMarkers).forEach(({ marker }) => map.removeLayer(marker));
     activeMarkers = {};
-  };
 
-  dbRef.on("value", (snapshot) => {
-    clearMarkers();
-    const events = snapshot.val();
-    if (!events) return;
+    Object.entries(events).forEach(([key, ev]) => {
+        const { lat, lon, title, description, topic, importance, type, url } = ev;
+        if (!lat || !lon) return;
 
-    Object.entries(events).forEach(([key, e]) => {
-      if (!e || !e.lat || !e.lon) return;
-      const color = getTopicColor(e.topic);
-      const minZoom = getMinZoomForImportance(e.importance);
+        const color = getTopicColor(topic);
+        const minZoom = getMinZoomForImportance(importance);
 
-      const marker = L.circleMarker([e.lat, e.lon], {
-        radius: 7,
-        color,
-        fillColor: color,
-        fillOpacity: 0.85,
-        weight: 1.5,
-      });
-      marker.options._topic = e.topic || "other";
+        const marker = L.circleMarker([lat, lon], {
+            radius: 7,
+            color,
+            fillColor: color,
+            fillOpacity: 0.85,
+            weight: 1.5
+        });
 
-      const popupHTML = `
-        <div style="font-family:sans-serif;max-width:260px;color:inherit;">
-          <div style="font-weight:700;">${escapeHtml(e.title || "Untitled")}</div>
-          <div style="font-size:12px;color:var(--popup-muted,#9ca3af);">${escapeHtml(e.type || "Source")}</div>
-          <div style="font-size:13px;color:var(--popup-muted,#d1d5db);margin:5px 0;">Topic: ${escapeHtml(e.topic || "N/A")} | Importance: ${escapeHtml(e.importance ? String(e.importance) : "?")}</div>
-          <div style="font-size:13px;">${escapeHtml(e.description || "")}</div>
-          ${e.url ? `<div style="margin-top:6px;"><a href="${escapeAttribute(e.url)}" target="_blank" style="color:#60a5fa;text-decoration:none;">Read full article →</a></div>` : ""}
-        </div>
-      `;
-      marker.bindPopup(popupHTML);
-      activeMarkers[key] = { marker, minZoom };
-      marker.addTo(map);
+        const popupHTML = `
+            <div style="font-family:sans-serif;color:#fff;max-width:250px;">
+                <div class="news-title">${title || "Untitled"}</div>
+                <div class="news-source">${type || "Unknown Source"}</div>
+                <div class="news-topic">Topic: ${topic || "N/A"} | Importance: ${importance || "?"}</div>
+                <div class="news-desc">${description || ""}</div>
+                ${url ? `<a href="${url}" target="_blank" class="news-link">Read full article →</a>` : ""}
+            </div>
+        `;
+
+        marker.bindPopup(popupHTML);
+        activeMarkers[key] = { marker, minZoom };
+        marker.addTo(map);
     });
 
+    console.log(`✅ Rendered ${Object.keys(activeMarkers).length} markers.`);
     updateMarkerVisibility();
     map.on("zoomend", updateMarkerVisibility);
-  });
 }
 
+// ============================================================
+// 5️⃣ Marker Visibility Control
+// ============================================================
 function updateMarkerVisibility() {
-  const zoom = map.getZoom();
-  Object.values(activeMarkers).forEach(({ marker, minZoom }) => {
-    if (zoom >= minZoom) map.addLayer(marker);
-    else map.removeLayer(marker);
-  });
+    const zoom = map.getZoom();
+    Object.values(activeMarkers).forEach(({ marker, minZoom }) => {
+        if (zoom >= minZoom) {
+            if (!map.hasLayer(marker)) map.addLayer(marker);
+        } else {
+            if (map.hasLayer(marker)) map.removeLayer(marker);
+        }
+    });
+    console.log(`🔍 Updated marker visibility at zoom ${zoom}.`);
 }
 
-// ======= Change Theme =======
-function changeTheme(newTheme) {
-  if (!TILE_THEMES[newTheme]) return;
-  currentTheme = newTheme;
-  localStorage.setItem("gm_theme", currentTheme);
+// ============================================================
+// 6️⃣ Topic Colors & Importance
+// ============================================================
+function getTopicColor(topic) {
+    topic = (topic || "").toLowerCase();
+    const theme = document.body.getAttribute("data-theme") || "dark";
 
-  if (tileLayer) map.removeLayer(tileLayer);
-  const cfg = TILE_THEMES[newTheme];
-  tileLayer = L.tileLayer(cfg.url, { attribution: cfg.attribution, maxZoom: 12 }).addTo(map);
+    const colorsDark = {
+        geopolitics: "red",
+        conflict: "crimson",
+        diplomacy: "darkred",
+        security: "firebrick",
+        economy: "limegreen",
+        finance: "green",
+        technology: "deepskyblue",
+        cyber: "steelblue",
+        science: "dodgerblue",
+        environment: "orange",
+        disaster: "darkorange",
+        energy: "gold",
+        other: "white"
+    };
 
-  Object.values(activeMarkers).forEach(({ marker }) => {
-    const topic = marker.options._topic;
-    const c = getTopicColor(topic);
-    marker.setStyle({ color: c, fillColor: c });
-  });
+    const colorsLight = {
+        geopolitics: "#b20000",
+        conflict: "#ff5555",
+        diplomacy: "#b23a3a",
+        security: "#d9534f",
+        economy: "#007700",
+        finance: "#006400",
+        technology: "#0077cc",
+        cyber: "#005fa3",
+        science: "#0066cc",
+        environment: "#ff8c00",
+        disaster: "#ff6600",
+        energy: "#ffaa00",
+        other: "black"
+    };
+
+    const palette = theme === "light" ? colorsLight : colorsDark;
+    return palette[topic] || (theme === "light" ? "black" : "white");
 }
 
-// ======= Control Panel =======
-function createControlPanel() {
-  const panel = document.createElement("div");
-  panel.id = "gm-control-panel";
-  panel.innerHTML = `
-    <button id="gm-panel-toggle">☰ Themes</button>
-    <div id="gm-panel" class="gm-hidden">
-      <h4>🗺️ Map Themes</h4>
-      <select id="gm-theme-selector">
-        ${Object.keys(TILE_THEMES)
-          .map(k => `<option value="${k}" ${k === currentTheme ? "selected" : ""}>${TILE_THEMES[k].name}</option>`)
-          .join("")}
-      </select>
-      <label for="crt-intensity" style="display:block;margin-top:10px;font-weight:600;">📺 CRT Intensity</label>
-      <input id="crt-intensity" type="range" min="0" max="1" step="0.05" />
-    </div>
-  `;
-  document.body.appendChild(panel);
-
-  const toggle = panel.querySelector("#gm-panel-toggle");
-  const dialog = panel.querySelector("#gm-panel");
-  const selector = panel.querySelector("#gm-theme-selector");
-  const slider = panel.querySelector("#crt-intensity");
-
-  const stored = parseFloat(localStorage.getItem("gm_crt") || "0.45");
-  slider.value = stored;
-  document.documentElement.style.setProperty("--crt-opacity", stored);
-
-  toggle.addEventListener("click", () => {
-    dialog.classList.toggle("gm-hidden");
-  });
-
-  selector.addEventListener("change", (e) => changeTheme(e.target.value));
-
-  slider.addEventListener("input", (e) => {
-    const v = e.target.value;
-    document.documentElement.style.setProperty("--crt-opacity", v);
-    localStorage.setItem("gm_crt", String(v));
-  });
+function getMinZoomForImportance(importance) {
+    switch (parseInt(importance)) {
+        case 5: return 0;  // global
+        case 4: return 3;
+        case 3: return 5;
+        case 2: return 7;
+        case 1:
+        default: return 9; // local
+    }
 }
 
-// ======= Safe HTML escaping =======
-function escapeHtml(s) {
-  return String(s || "").replace(/[&<>"']/g, (m) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-  }[m]));
-}
-function escapeAttribute(s) {
-  return String(s || "").replace(/"/g, "%22");
+// ============================================================
+// 7️⃣ Theme System
+// ============================================================
+function switchTheme(theme) {
+    if (!tileLayers[theme]) {
+        console.error(`❌ Unknown theme: ${theme}`);
+        return;
+    }
+
+    Object.values(tileLayers).forEach(layer => {
+        if (map.hasLayer(layer)) map.removeLayer(layer);
+    });
+
+    map.addLayer(tileLayers[theme]);
+    document.body.setAttribute("data-theme", theme);
+    currentTheme = theme;
+
+    console.log(`🌗 Theme switched → ${theme}`);
 }
 
-// ======= Start =======
-document.addEventListener("DOMContentLoaded", loadConfig);
+// ============================================================
+// 8️⃣ Init everything
+// ============================================================
+document.addEventListener("DOMContentLoaded", async () => {
+    console.log("🚀 DOM loaded. Launching Geomonitor...");
+    try {
+        await initMap();
+        console.log("✅ Geomonitor fully initialized!");
+    } catch (e) {
+        console.error("💥 Fatal error during initialization:", e);
+    }
+
+    // Theme selector event
+    const themeMenu = document.getElementById("themeMenu");
+    if (themeMenu) {
+        themeMenu.addEventListener("change", (e) => {
+            switchTheme(e.target.value);
+        });
+        console.log("🎛️ Theme selector initialized.");
+    } else {
+        console.warn("⚠️ No theme selector found in DOM.");
+    }
+});
