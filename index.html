@@ -5,19 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Geomonitor</title>
 
-  <!-- ✅ Fixed Leaflet CSS (no integrity) -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <link rel="stylesheet" href="style.css" />
 </head>
-
 <body data-theme="dark" class="crt-scanlines crt-flicker">
   <div id="map"></div>
 
-  <!-- Control Panel -->
   <div id="gm-control-panel">
     <button id="gm-panel-toggle" aria-expanded="false">⚙️ Settings</button>
     <div id="gm-panel" class="gm-hidden" role="dialog" aria-hidden="true">
@@ -31,24 +27,20 @@
 
   <div id="status-text" style="position:fixed;bottom:6px;left:12px;font-size:13px;color:#ccc;"></div>
 
-  <!-- 🔑 MapTiler key injected automatically by GitHub Actions -->
+  <!-- The placeholder text below gets replaced by the workflow -->
   <script>
-    const MAPTILER_KEY = "YOUR_MAPTILER_API_KEY_HERE"; // replaced during deploy
+    const MAPTILER_KEY = "YOUR_MAPTILER_API_KEY_HERE";
   </script>
 
-  <!-- ✅ Fixed Leaflet JS (no integrity) -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "YOUR_FIREBASE_API_KEY",
-      authDomain: "geomonitor-2025.firebaseapp.com",
-      databaseURL: "https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app/",
-      projectId: "geomonitor-2025",
-      storageBucket: "geomonitor-2025.appspot.com",
+      authDomain: "geomonitor.firebaseapp.com",
+      databaseURL: "https://geomonitor-default-rtdb.europe-west1.firebasedatabase.app/",
+      projectId: "geomonitor",
+      storageBucket: "geomonitor.appspot.com",
       messagingSenderId: "123456789",
       appId: "1:123456789:web:abcdef123456"
     };
