@@ -1,4 +1,4 @@
-name: Geomonitor Data Injector + Deploy
+name: Geomonitor Build + Deploy
 
 on:
   schedule:
@@ -12,14 +12,16 @@ jobs:
   run_injector:
     name: 🧠 Inject data into Firebase
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-      - name: Install dependencies
+
+      - name: Install Python dependencies
         run: pip install requests geopy python-dotenv
+
       - name: Run data injector
         env:
           FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
@@ -28,36 +30,50 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: python data_injector.py
 
-  deploy_site:
-    name: 🌐 Deploy Website to GitHub Pages
-    runs-on: ubuntu-latest
-    needs: run_injector
+      - name: Prepare index.html for deploy (inject MapTiler key)
+        env:
+          MAPTILER_KEY: ${{ secrets.MAPTILER_KEY }}
+        run: |
+          echo "🔧 Injecting MapTiler key into index.html (placeholder -> secret)"
+          # make a copy to avoid modifying history on main; we deploy from workspace
+          cp index.html index.html.deploy
+          # replace placeholder
+          sed -i "s|MAPTILER_KEY_PLACEHOLDER|$MAPTILER_KEY|g" index.html.deploy
+          # show a tiny preview (first 6 lines) for logs (the key will be censored)
+          echo "----- index.html.deploy preview -----"
+          head -n 12 index.html.deploy
+          echo "-------------------------------------"
 
+      - name: Upload prepared site files
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-files
+          path: |
+            index.html.deploy
+            app.js
+            style.css
+            # add other static assets you want to publish (images, fonts, etc.)
+
+  deploy_site:
+    name: 🌐 Deploy to GitHub Pages
+    needs: run_injector
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      # ✅ Create config.json *in the repo root* (where index.html is)
-      - name: Create map config
-        run: |
-          echo "{\"maptiler_key\": \"${{ secrets.MAPTILER_KEY }}\"}" > ./config.json
-          echo "✅ Created config.json with MapTiler key"
-          cat config.json
+      - name: Download prepared site files
+        uses: actions/download-artifact@v4
+        with:
+          name: site-files
 
-      # ✅ Verify that the file exists before deploy
-      - name: Verify config file
+      - name: Move prepared files into place
         run: |
-          if [ ! -f "./config.json" ]; then
-            echo "❌ config.json not found in root!"
-            exit 1
-          fi
-          echo "✅ config.json exists in $(pwd)"
+          mv index.html.deploy index.html
+          ls -la
 
-      # ✅ Deploy everything to gh-pages (root directory)
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./
-          keep_files: false
-          force_orphan: false
