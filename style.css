@@ -1,124 +1,104 @@
 /* ============================
-   🌍 GEOMONITOR GLOBAL STYLES
+   🌍 GEOMONITOR STYLES
    ============================ */
 
 body {
   margin: 0;
   padding: 0;
-  background-color: #0d1117;
   font-family: "Inter", system-ui, sans-serif;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Dark theme (default) */
+body.dark {
+  background-color: #0d1117;
+  color: #f3f4f6;
+}
+
+/* Light theme */
+body.light {
+  background-color: #f3f4f6;
+  color: #111827;
 }
 
 /* Map container */
 #map {
   height: 100vh;
   width: 100vw;
-  background-color: #000;
 }
 
-/* Popup Styling */
+/* Popup styling */
 .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-  background: #1f2937;
-  color: #f3f4f6;
+  background: var(--popup-bg, #1f2937);
+  color: var(--popup-fg, #f3f4f6);
   border-radius: 8px;
   border: 1px solid #374151;
 }
 
-.leaflet-popup-content {
-  font-size: 14px;
-}
-
-.news-title {
-  font-weight: bold;
-  font-size: 16px;
-  color: #e5e7eb;
-  margin-bottom: 5px;
-}
-
-.news-source {
-  font-size: 12px;
-  color: #9ca3af;
-  margin-bottom: 5px;
-}
-
-.news-topic {
-  font-size: 13px;
-  color: #d1d5db;
-  margin-bottom: 5px;
-}
-
-.news-desc {
-  font-size: 13px;
-  color: #cbd5e1;
-}
-
-.news-link {
-  color: #60a5fa;
-  text-decoration: none;
-  font-weight: 600;
-  display: block;
-  margin-top: 10px;
-}
-
-.news-link:hover {
-  text-decoration: underline;
-}
-
-/* ============================
-   🗺️ Legend Styles
-   ============================ */
-
-#legend-container {
+/* Control Panel (bottom-right) */
+#control-panel {
   position: absolute;
-  top: 15px;
-  left: 15px;
+  bottom: 15px;
+  right: 15px;
   z-index: 1000;
   font-size: 14px;
+  text-align: left;
 }
 
-#legend-toggle {
+/* Toggle button */
+#panel-toggle {
   background-color: #1f2937;
   color: #f3f4f6;
   border: 1px solid #374151;
-  padding: 6px 10px;
   border-radius: 8px;
+  padding: 6px 10px;
   cursor: pointer;
   font-weight: 600;
 }
 
-#legend-toggle:hover {
+#panel-toggle:hover {
   background-color: #374151;
 }
 
-#legend {
+/* Panel content */
+#panel {
   margin-top: 8px;
   background-color: #1f2937;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #374151;
   box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  width: 230px;
 }
 
-#legend h4 {
+body.light #panel,
+body.light #panel-toggle {
+  background-color: #e5e7eb;
+  color: #111827;
+  border-color: #9ca3af;
+}
+
+/* Hidden state */
+.hidden { display: none; }
+
+#panel h4 {
   margin: 0 0 6px 0;
   font-size: 14px;
-  color: #e5e7eb;
 }
 
-#legend ul {
+#panel ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-#legend li {
-  color: #d1d5db;
+#panel li {
   margin-bottom: 4px;
   display: flex;
   align-items: center;
 }
 
-#legend .dot {
+.dot {
   display: inline-block;
   width: 12px;
   height: 12px;
@@ -132,6 +112,30 @@ body {
 .dot.orange { background: orange; }
 .dot.white { background: white; }
 
-.hidden {
-  display: none;
+#panel button {
+  width: 100%;
+  margin-top: 8px;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  background-color: #111827;
+  color: #f3f4f6;
+  transition: background-color 0.2s;
+}
+
+#panel button:hover {
+  background-color: #374151;
+}
+
+body.light #panel button {
+  background-color: #e5e7eb;
+  color: #111827;
+  border-color: #9ca3af;
+}
+
+body.light #panel button:hover {
+  background-color: #d1d5db;
 }
