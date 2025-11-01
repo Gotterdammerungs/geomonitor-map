@@ -45,27 +45,30 @@ function setupRealtimeListener() {
                     const lat = event.lat;
                     const lon = event.lon;
                     
-                    // Customize the popup content with event details
+                    // ✅ Updated popup content with clickable link
                     const popupContent = `
-                        <div style="font-family: sans-serif; font-size: 14px; color: #000;">
+                        <div style="font-family: sans-serif; font-size: 14px;">
                             <b>${event.title || 'Unknown Event'}</b><br>
-                            <span style="color: #c90">${event.type || 'N/A'}</span>, Severity: ${event.severity || 'N/A'}<br>
-                            Description: ${event.description || ''}
+                            <span>${event.type || 'N/A'}</span>, Severity: ${event.severity || 'N/A'}<br>
+                            <div>${event.description || ''}</div>
+                            ${
+                                event.url
+                                    ? `<div><a href="${event.url}" target="_blank" rel="noopener noreferrer">Read full article</a></div>`
+                                    : ''
+                            }
                         </div>
                     `;
                     
                     // Create a marker and add it to the map
                     const marker = L.marker([lat, lon]).addTo(map)
-                        .bindPopup(popupContent)
-                        .openPopup(); 
+                        .bindPopup(popupContent);
                         
                     // Store the marker
                     activeMarkers[key] = marker;
                 }
             });
             
-            // For the test, center the map on the test event (New York)
-            // Note: This will execute on every data update, potentially changing the view.
+            // For testing: center on New York (remove later if not needed)
             map.setView([40.7128, -74.0060], 10); 
             
         } else {
@@ -77,5 +80,4 @@ function setupRealtimeListener() {
 }
 
 // 3. Start the whole Geomonitor process
-// This is the fix: calling the initialization function.
 initMap();
