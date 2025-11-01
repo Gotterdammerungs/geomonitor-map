@@ -42,10 +42,11 @@ function initMap() {
   }).addTo(map);
   console.log("🗺️ Map initialized:", currentTheme);
   setupRealtimeListener();
+  setupControlPanel();
 }
 
 // =============================
-// 3. Color System (theme-aware)
+// 3. Topic Colors (theme-aware)
 // =============================
 function getTopicColor(topic) {
   topic = (topic || "").toLowerCase();
@@ -75,7 +76,7 @@ function getTopicColor(topic) {
 }
 
 // =============================
-// 4. Visibility by Importance
+// 4. Zoom Levels by Importance
 // =============================
 function getMinZoomForImportance(importance) {
   switch (parseInt(importance)) {
@@ -89,7 +90,7 @@ function getMinZoomForImportance(importance) {
 }
 
 // =============================
-// 5. Firebase Realtime Listener
+// 5. Firebase Listener
 // =============================
 function setupRealtimeListener() {
   const dbRef = firebase.database().ref("/events");
@@ -156,7 +157,7 @@ function updateMarkerVisibility() {
 }
 
 // =============================
-// 7. Create Control Panel
+// 7. Control Panel
 // =============================
 function setupControlPanel() {
   const panelHTML = `
@@ -167,7 +168,8 @@ function setupControlPanel() {
         <select id="theme-selector">
           ${Object.keys(TILE_THEMES)
             .map(
-              (key) => `<option value="${key}" ${key === currentTheme ? "selected" : ""}>${TILE_THEMES[key].name}</option>`
+              (key) =>
+                `<option value="${key}" ${key === currentTheme ? "selected" : ""}>${TILE_THEMES[key].name}</option>`
             )
             .join("")}
         </select>
@@ -180,17 +182,15 @@ function setupControlPanel() {
 
   document.body.insertAdjacentHTML("beforeend", panelHTML);
 
-  // Attach listeners
   const toggleButton = document.getElementById("panel-toggle");
   const panel = document.getElementById("panel");
+
   toggleButton.addEventListener("click", () => {
     panel.classList.toggle("hidden");
   });
 
   const selector = document.getElementById("theme-selector");
-  selector.addEventListener("change", (e) => {
-    changeTheme(e.target.value);
-  });
+  selector.addEventListener("change", (e) => changeTheme(e.target.value));
 
   const crtSlider = document.getElementById("crt-intensity");
   crtSlider.addEventListener("input", (e) => {
@@ -199,18 +199,16 @@ function setupControlPanel() {
 }
 
 // =============================
-// 8. Change Map Theme
+// 8. Change Theme
 // =============================
 function changeTheme(theme) {
   if (!TILE_THEMES[theme]) return;
   currentTheme = theme;
   map.removeLayer(tileLayer);
-
   tileLayer = L.tileLayer(TILE_THEMES[theme].url, {
     attribution: TILE_THEMES[theme].attribution,
     maxZoom: 12,
   }).addTo(map);
-
   console.log(`🎨 Theme switched to: ${theme}`);
   updateAllMarkerColors();
 }
@@ -230,9 +228,8 @@ function updateAllMarkerColors() {
 }
 
 // =============================
-// 10. Initialize on Page Load
+// 10. Start
 // =============================
 document.addEventListener("DOMContentLoaded", () => {
   initMap();
-  setupControlPanel();
 });
