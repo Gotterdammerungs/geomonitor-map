@@ -2,7 +2,7 @@ name: Geomonitor Data Injector + Web Deploy
 
 on:
   schedule:
-    # Run every 5 minutes
+    # Runs every 5 minutes
     - cron: "*/5 * * * *"
   workflow_dispatch:
 
@@ -21,7 +21,8 @@ jobs:
           python-version: "3.x"
 
       - name: 📦 Install dependencies
-        run: pip install requests geopy python-dotenv
+        run: |
+          pip install requests geopy python-dotenv
 
       - name: 🚀 Run data injector script
         env:
@@ -47,39 +48,41 @@ jobs:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
 
-      - name: 🧰 Install jq and perl for key injection
-        run: sudo apt-get update && sudo apt-get install -y jq perl
+      - name: 🧰 Install dependencies for key injection
+        run: sudo apt-get update && sudo apt-get install -y perl
 
-      - name: 🔧 Inject MapTiler key safely
+      - name: 🔑 Inject MapTiler key
         env:
           MAPTILER_KEY: ${{ secrets.MAPTILER_KEY }}
         run: |
-          echo "🔧 Injecting MapTiler key into index.html safely..."
+          echo "🔧 Injecting MapTiler key..."
           if [ -z "$MAPTILER_KEY" ]; then
             echo "❌ ERROR: Missing MAPTILER_KEY secret!"
             exit 1
           fi
-          cp index.html index.html.deploy
-          # Use perl for literal substitution (handles /, +, &, etc.)
-          perl -pe 's/MAPTILER_KEY_PLACEHOLDER/$ENV{MAPTILER_KEY}/g' index.html > index.html.deploy
-          head -n 15 index.html.deploy
-          mv index.html.deploy index.html
-          echo "✅ MapTiler key injection done."
+
+          # Make sure index.html exists
+          if [ ! -f index.html ]; then
+            echo "❌ ERROR: index.html not found!"
+            exit 1
+          fi
+
+          perl -pe "s/MAPTILER_KEY_PLACEHOLDER/$ENV{MAPTILER_KEY}/g" index.html > index.html.tmp && mv index.html.tmp index.html
+          echo "✅ MapTiler key successfully injected."
 
       - name: 🪣 Prepare deployment folder
         run: |
           mkdir -p public
           cp -r index.html app.js style.css dictionary.json public/ || true
-          echo "✅ Files ready for deploy:"
-          ls -al public/
+          echo "✅ Files copied to /public"
 
       - name: 🚀 Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
           publish_branch: gh-pages
-          commit_message: "Deploy Geomonitor frontend 🚀"
+          publish_dir: ./public
+          commit_message: "🚀 Deploy Geomonitor frontend"
 
       - name: ✅ Done
         run: echo "🎉 Deployment complete! View at: https://gotterdammerungs.github.io/geomonitor-map/"
