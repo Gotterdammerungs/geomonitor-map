@@ -6,12 +6,19 @@ on:
   schedule:
     - cron: '*/15 * * * *'  # Every 15 minutes
     - cron: '05 04 * * *'    # Daily at 04:05 UTC (05:05 CET)
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Why are you manually running this workflow?"
+        required: false
+        default: "Manual trigger via GitHub Actions UI"
 
 permissions:
-  contents: write  # needed for Pages deploy
+  contents: write  # Required for GitHub Pages deploy
 
 jobs:
   inject-and-deploy:
+    name: Run Data Injector & Deploy Site
     runs-on: ubuntu-latest
     env:
       NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
@@ -49,6 +56,7 @@ jobs:
       - name: 🧠 Run data injector
         run: |
           echo "=== Starting Geomonitor Data Injector ==="
+          echo "Triggered manually? ${{ github.event.inputs.reason }}"
           python data_injector.py
         env:
           NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
@@ -56,10 +64,9 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
 
-      - name: 🗺️ Build static site (if needed)
-        # Skip this step if your site is plain HTML/CSS/JS
+      - name: 🗺️ Prepare static site
         run: |
-          echo "No build step detected — static site assumed."
+          echo "Preparing static site for deployment..."
           mkdir -p dist
           cp -r index.html style.css crt.css app.js assets/ dist/ 2>/dev/null || true
 
@@ -69,8 +76,9 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./dist
-          commit_message: "🚀 Auto-deploy site + new data update [skip ci]"
+          commit_message: "🚀 Auto-deploy site + data update [${{ github.event_name }}] [skip ci]"
 
       - name: ✅ Summary
         run: |
-          echo "Geomonitor Data Injector and site deployment complete."
+          echo "✅ Geomonitor data injected and site deployed successfully!"
+          echo "🕒 Trigger reason: ${{ github.event.inputs.reason || 'Scheduled or push' }}"
