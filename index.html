@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Geomonitor</title>
 
   <!-- Leaflet -->
@@ -10,42 +10,55 @@
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <link rel="stylesheet" href="style.css" />
-</head>
-<body data-theme="dark" class="crt-scanlines crt-flicker">
-  <div id="map"></div>
+  <link rel="stylesheet" href="crt.css" />
 
-  <div id="gm-control-panel">
-    <button id="gm-panel-toggle" aria-expanded="false">⚙️ Settings</button>
-    <div id="gm-panel" class="gm-hidden" role="dialog" aria-hidden="true">
-      <h4>Map Options</h4>
-      <label for="gm-theme-selector">Tile Theme</label>
-      <select id="gm-theme-selector"></select>
-      <label for="crt-intensity">CRT Intensity</label>
-      <input type="range" id="crt-intensity" min="0" max="1" step="0.05" value="0.45" />
-    </div>
-  </div>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-  <div id="status-text" style="position:fixed;bottom:6px;left:12px;font-size:13px;color:#ccc;"></div>
+  <script>
+    // Firebase configuration
+    var firebaseConfig = {
+      apiKey: "AIzaSyDtdaS3UfXUokfyQme9r-w52bMalq1aIhU",
+      authDomain: "geomonitor-2025.firebaseapp.com",
+      databaseURL: "https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "geomonitor-2025",
+      storageBucket: "geomonitor-2025.firebasestorage.app",
+      messagingSenderId: "454720047299",
+      appId: "1:454720047299:web:9578c37314bc1f43b53a76",
+      measurementId: "G-2VQE4SDRF3"
+    };
+    firebase.initializeApp(firebaseConfig);
+    firebase.auth().signInAnonymously().catch(err => console.error(err.message));
+  </script>
 
-  <!-- The placeholder text below gets replaced by the workflow -->
+  <!-- 🔑 MapTiler key placeholder (gets replaced on deploy) -->
   <script>
     const MAPTILER_KEY = "YOUR_MAPTILER_API_KEY_HERE";
   </script>
+</head>
 
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "YOUR_FIREBASE_API_KEY",
-      authDomain: "geomonitor.firebaseapp.com",
-      databaseURL: "https://geomonitor-default-rtdb.europe-west1.firebasedatabase.app/",
-      projectId: "geomonitor",
-      storageBucket: "geomonitor.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:abcdef123456"
-    };
-    firebase.initializeApp(firebaseConfig);
-  </script>
+<body class="dark crt-scanlines crt-flicker crt-colorsep">
+  <div id="map"></div>
+
+  <div id="control-panel">
+    <button id="panel-toggle">☰</button>
+    <div id="panel" class="hidden">
+      <h4>🗺️ Topic Legend</h4>
+      <ul>
+        <li><span class="dot red"></span> Geopolitics / Security</li>
+        <li><span class="dot green"></span> Finance / Economy</li>
+        <li><span class="dot blue"></span> Technology / Science</li>
+        <li><span class="dot orange"></span> Environment / Disaster</li>
+        <li><span class="dot white"></span> Other / Uncategorized</li>
+      </ul>
+      <hr />
+      <label for="crt-intensity">📺 CRT Intensity</label>
+      <input id="crt-intensity" type="range" min="0" max="1" step="0.05" value="0.5" />
+      <button id="theme-toggle">🌙 Dark Mode</button>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
