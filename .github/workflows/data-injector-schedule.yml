@@ -1,25 +1,64 @@
-name: Deploy Geomonitor to GitHub Pages
+name: Deploy Geomonitor to GitHub Pages (robust injection)
+
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Inject MapTiler key
+      - name: Show repo root (debug)
+        run: ls -la
+
+      - name: Prepare dist directory
         run: |
+          rm -rf dist
           mkdir -p dist
-          sed "s|YOUR_MAPTILER_API_KEY_HERE|${{ secrets.MAPTILER_KEY }}|g" index.html > dist/index.html
-          cp app.js style.css crt.css dist/
 
-      - name: Deploy
+      - name: Install Node (for robust templating)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Inject MapTiler key into template (Node - safe)
+        env:
+          MAPTILER_KEY: ${{ secrets.MAPTILER_KEY }}
+        run: |
+          echo "Writing dist/index.html using Node (MAPTILER_KEY masked in logs)..."
+          node -e "
+            const fs = require('fs');
+            const tpl = fs.readFileSync('index.template.html','utf8');
+            const key = process.env.MAPTILER_KEY || '';
+            const out = tpl.replace(/YOUR_MAPTILER_API_KEY_HERE/g, key);
+            fs.writeFileSync('dist/index.html', out, 'utf8');
+            console.log('Wrote dist/index.html (' + (key? 'MAPTILER_KEY injected' : 'NO KEY PROVIDED') + ')');
+          "
+          # copy static files
+          cp app.js style.css crt.css dist/ || true
+
+      - name: Sanity check: ensure placeholder is gone
+        run: |
+          if grep -q "YOUR_MAPTILER_API_KEY_HERE" dist/index.html; then
+            echo "ERROR: Placeholder STILL PRESENT in dist/index.html — aborting deployment"
+            echo "First 40 lines of dist/index.html:"
+            head -n 40 dist/index.html
+            exit 1
+          else
+            echo "OK: Placeholder not found in dist/index.html"
+            echo "First 10 lines of dist/index.html (key masked):"
+            head -n 10 dist/index.html
+          fi
+
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
