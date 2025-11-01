@@ -9,33 +9,44 @@ body {
   transition: background-color 0.3s, color 0.3s;
 }
 
-/* Dark theme (default) */
+/* === Dark & Light Modes === */
 body.dark {
   background-color: #0d1117;
   color: #f3f4f6;
 }
 
-/* Light theme */
 body.light {
   background-color: #f3f4f6;
   color: #111827;
 }
 
-/* Map container */
+/* Map container fills viewport */
 #map {
   height: 100vh;
   width: 100vw;
 }
 
-/* Popup styling */
-.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+/* ============================
+   Popup Styles
+   ============================ */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
   background: var(--popup-bg, #1f2937);
   color: var(--popup-fg, #f3f4f6);
   border-radius: 8px;
   border: 1px solid #374151;
 }
 
-/* Control Panel (bottom-right) */
+body.light .leaflet-popup-content-wrapper,
+body.light .leaflet-popup-tip {
+  background: #ffffff;
+  color: #111827;
+  border-color: #9ca3af;
+}
+
+/* ============================
+   Control Panel (Bottom Right)
+   ============================ */
 #control-panel {
   position: absolute;
   bottom: 15px;
@@ -45,7 +56,7 @@ body.light {
   text-align: left;
 }
 
-/* Toggle button */
+/* Toggle button (hamburger) */
 #panel-toggle {
   background-color: #1f2937;
   color: #f3f4f6;
@@ -60,7 +71,17 @@ body.light {
   background-color: #374151;
 }
 
-/* Panel content */
+body.light #panel-toggle {
+  background-color: #e5e7eb;
+  color: #111827;
+  border-color: #9ca3af;
+}
+
+body.light #panel-toggle:hover {
+  background-color: #d1d5db;
+}
+
+/* Panel box */
 #panel {
   margin-top: 8px;
   background-color: #1f2937;
@@ -71,19 +92,23 @@ body.light {
   width: 230px;
 }
 
-body.light #panel,
-body.light #panel-toggle {
-  background-color: #e5e7eb;
+body.light #panel {
+  background-color: #ffffff;
   color: #111827;
-  border-color: #9ca3af;
+  border-color: #d1d5db;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* Hidden state */
-.hidden { display: none; }
+/* Hide panel */
+.hidden {
+  display: none;
+}
 
+/* Header + List */
 #panel h4 {
   margin: 0 0 6px 0;
   font-size: 14px;
+  font-weight: 600;
 }
 
 #panel ul {
@@ -98,6 +123,7 @@ body.light #panel-toggle {
   align-items: center;
 }
 
+/* Topic dots */
 .dot {
   display: inline-block;
   width: 12px;
@@ -112,6 +138,7 @@ body.light #panel-toggle {
 .dot.orange { background: orange; }
 .dot.white { background: white; }
 
+/* Buttons inside panel */
 #panel button {
   width: 100%;
   margin-top: 8px;
@@ -139,3 +166,10 @@ body.light #panel button {
 body.light #panel button:hover {
   background-color: #d1d5db;
 }
+
+/* ============================
+   CRT Intensity Slider
+   ============================ */
+#panel label {
+  display: block;
+  margin-top
