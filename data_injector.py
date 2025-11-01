@@ -3,9 +3,20 @@ import os
 import requests
 import json
 import re
-from geopy.geocoders import Nominatim, Geoapify
-from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 from datetime import datetime, timedelta
+
+# ============================================================
+# 🌍 GEOLOCATOR IMPORTS (safe Geoapify fallback)
+# ============================================================
+try:
+    from geopy.geocoders import Nominatim, Geoapify
+    GEOAPIFY_AVAILABLE = True
+except ImportError:
+    from geopy.geocoders import Nominatim
+    Geoapify = None
+    GEOAPIFY_AVAILABLE = False
+
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
 # ============================================================
 # 🧭 LOGGING HELPER
@@ -16,9 +27,9 @@ def log(msg):
 # ============================================================
 # ⚙️ CONFIGURATION
 # ============================================================
-FIREBASE_URL = os.environ.get("https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app/")
-NEWS_API_KEY = os.environ.get("7f0c06cb96494e1ca7e86eace438fd29")
-GEOAPIFY_KEY = os.environ.get("c23e2a4291644b5a812ae44b97722caf")
+FIREBASE_URL = os.environ.get("FIREBASE_URL", "https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app")
+NEWS_API_KEY = os.environ.get("NEWS_API_KEY")
+GEOAPIFY_KEY = os.environ.get("GEOAPIFY_KEY")
 
 log("Booting Geomonitor Data Injector...")
 log(f"Firebase URL: {FIREBASE_URL or '❌ NOT SET'}")
@@ -61,6 +72,7 @@ def extract_dateline_location(text):
         return normalized
     return None
 
+
 def extract_location_hint(text):
     """Finds phrases like 'in Paris' or 'from New York City'."""
     if not text:
@@ -71,6 +83,7 @@ def extract_location_hint(text):
         normalized = CUSTOM_LOCATIONS.get(raw_place.lower(), raw_place)
         return normalized
     return None
+
 
 def resolve_location_name(article):
     """
@@ -118,11 +131,15 @@ def resolve_location_name(article):
 # ============================================================
 try:
     geolocator_nom = Nominatim(user_agent="geomonitor_news_app")
-    geolocator_geo = Geoapify(api_key=GEOAPIFY_KEY) if GEOAPIFY_KEY else None
-    log("✅ Initialized geocoders (Nominatim + Geoapify fallback).")
+    geolocator_geo = Geoapify(api_key=GEOAPIFY_KEY) if GEOAPIFY_AVAILABLE and GEOAPIFY_KEY else None
+    if geolocator_geo:
+        log("✅ Initialized geocoders: Nominatim + Geoapify fallback.")
+    else:
+        log("✅ Initialized Nominatim geocoder (Geoapify unavailable).")
 except Exception as e:
     log(f"❌ Geocoder initialization error: {e}")
     exit(1)
+
 
 def geocode_location(location_name):
     if not location_name:
@@ -136,107 +153,4 @@ def geocode_location(location_name):
             log(f"🗺️ Nominatim → '{location_name}' → ({loc.latitude:.4f}, {loc.longitude:.4f})")
             return loc.latitude, loc.longitude
     except Exception as e:
-        log(f"⚠️ Nominatim failed for '{location_name}': {e}")
-
-    # Geoapify fallback
-    if geolocator_geo:
-        try:
-            loc = geolocator_geo.geocode(location_name, timeout=10)
-            if loc:
-                log(f"🌐 Geoapify → '{location_name}' → ({loc.latitude:.4f}, {loc.longitude:.4f})")
-                return loc.latitude, loc.longitude
-            else:
-                log(f"⚠️ Geoapify could not find '{location_name}'")
-        except Exception as e:
-            log(f"⚠️ Geoapify error for '{location_name}': {e}")
-
-    return None, None
-
-# ============================================================
-# 📰 FETCH NEWS
-# ============================================================
-def fetch_and_geocode_news():
-    url = (
-        f"https://newsapi.org/v2/everything?q=world&language=en&"
-        f"sortBy=publishedAt&pageSize=15&apiKey={NEWS_API_KEY}"
-    )
-    log(f"Fetching news from NewsAPI: {url}")
-
-    try:
-        data = requests.get(url, timeout=15).json()
-        articles = data.get("articles", [])
-        log(f"Fetched {len(articles)} articles.")
-    except Exception as e:
-        log(f"❌ Failed to fetch NewsAPI: {e}")
-        return {}
-
-    events = {}
-    for i, art in enumerate(articles):
-        title = art.get("title", "").strip() or "Untitled"
-        log(f"\n[{i+1}/{len(articles)}] Processing: {title}")
-
-        loc_hint = resolve_location_name(art)
-        if not loc_hint:
-            log("❌ No location hint found; skipping.")
-            continue
-
-        lat, lon = geocode_location(loc_hint)
-        if lat and lon:
-            key = f"news_{int(time.time())}_{i}"
-            events[key] = {
-                "title": title,
-                "description": art.get("description", "No Description"),
-                "type": (art.get("source", {}) or {}).get("name", "General News"),
-                "severity": "Info",
-                "url": art.get("url", "#"),
-                "lat": lat,
-                "lon": lon,
-                "timestamp": art.get("publishedAt") or datetime.utcnow().isoformat(),
-            }
-    return events
-
-# ============================================================
-# 🔥 MERGE + CLEANUP EVENTS
-# ============================================================
-def push_batch_events(new_events):
-    fb_url = f"{FIREBASE_URL}/events.json"
-    cutoff = datetime.utcnow() - timedelta(days=2)
-
-    # Fetch existing
-    try:
-        old = requests.get(fb_url, timeout=10).json() or {}
-        log(f"Fetched {len(old)} existing events from Firebase.")
-    except Exception as e:
-        log(f"⚠️ Could not fetch existing data: {e}")
-        old = {}
-
-    # Keep only recent
-    kept = {}
-    for key, ev in old.items():
-        try:
-            ts = ev.get("timestamp")
-            ts_dt = datetime.fromisoformat(ts.replace("Z", "")) if isinstance(ts, str) else datetime.utcfromtimestamp(float(ts))
-            if ts_dt > cutoff:
-                kept[key] = ev
-        except Exception:
-            pass
-    log(f"Keeping {len(kept)} old events (newer than 2 days).")
-
-    # Merge and push
-    merged = {**kept, **new_events}
-    try:
-        log(f"Pushing {len(merged)} merged events → {fb_url}")
-        r = requests.put(fb_url, data=json.dumps(merged))
-        r.raise_for_status()
-        log(f"✅ PUSH COMPLETE: {len(merged)} total events now stored.")
-    except Exception as e:
-        log(f"❌ PUSH FAILED: {e}")
-
-# ============================================================
-# 🚀 MAIN EXECUTION
-# ============================================================
-if __name__ == "__main__":
-    log("=== Starting Data Injection Job ===")
-    events = fetch_and_geocode_news()
-    push_batch_events(events)
-    log("=== Job Complete ===")
+        log(f"⚠️ Nominatim failed for '{lo
