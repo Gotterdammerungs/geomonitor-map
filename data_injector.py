@@ -15,27 +15,25 @@ except ImportError:
     from geopy.geocoders import Nominatim
     Geoapify = None
     GEOAPIFY_AVAILABLE = False
-
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
-
 
 # ============================================================
 # 🧭 LOGGING
 # ============================================================
 def log(msg: str):
-    """Print a UTC timestamped log message."""
     print(f"[{datetime.utcnow().strftime('%H:%M:%S')}] {msg}")
-
 
 # ============================================================
 # ⚙️ CONFIG
 # ============================================================
 FIREBASE_URL = os.environ.get(
     "FIREBASE_URL",
-    "https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app"
+    "https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app/"
 )
-NEWS_API_KEY = os.environ.get("7f0c06cb96494e1ca7e86eace438fd29")
-GEOAPIFY_KEY = os.environ.get("c23e2a4291644b5a812ae44b97722caf")
+NEWS_API_KEY = os.environ.get("NEWS_API_KEY")
+GEOAPIFY_KEY = os.environ.get("GEOAPIFY_KEY")
+AI_API_KEY = os.environ.get("AI_API_KEY", "")
+AI_IS_ON = True  # toggle manually
 
 log("Booting Geomonitor Data Injector...")
 log(f"Firebase URL: {FIREBASE_URL}")
@@ -59,14 +57,42 @@ except Exception as e:
     CUSTOM_LOCATIONS = {}
 
 # ============================================================
-# 🔤 REGEX PATTERNS
+# 🔤 REGEX
 # ============================================================
 PLACE_REGEX = re.compile(r"\b(?:in|at|near|from)\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*)")
 DATELINE_REGEX = re.compile(r"^\s*([A-Z][A-Z]+|[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)(?:\s*—|,)")
 
+# ============================================================
+# 🧠 AI FALLBACK
+# ============================================================
+def ai_guess_location(article):
+    """Ask a small AI model to guess a likely city or country."""
+    if not AI_IS_ON or not AI_API_KEY:
+        return None
+    title = article.get("title", "")
+    desc = article.get("description", "")
+    text = f"Title: {title}\nDescription: {desc}\n\nWhat city or country is this news most likely about? Return only the location name."
+    try:
+        import openai
+        openai.api_key = AI_API_KEY
+        resp = openai.ChatCompletion.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a location extraction assistant. Reply with only one location name."},
+                {"role": "user", "content": text},
+            ],
+            max_tokens=10,
+            temperature=0.3,
+        )
+        guess = resp["choices"][0]["message"]["content"].strip()
+        log(f"🧠 AI guessed location → {guess}")
+        return guess
+    except Exception as e:
+        log(f"⚠️ AI inference failed: {e}")
+        return None
 
 # ============================================================
-# 📍 LOCATION RESOLUTION
+# 📍 LOCATION HELPERS
 # ============================================================
 def extract_dateline_location(text: str):
     if not text:
@@ -77,7 +103,6 @@ def extract_dateline_location(text: str):
         return CUSTOM_LOCATIONS.get(raw.lower(), raw)
     return None
 
-
 def extract_location_hint(text: str):
     if not text:
         return None
@@ -87,49 +112,8 @@ def extract_location_hint(text: str):
         return CUSTOM_LOCATIONS.get(raw_place.lower(), raw_place)
     return None
 
-
-def resolve_location_name(article: dict):
-    """Dictionary → Dateline → Keyword → Regex."""
-    src = (article.get("source", {}) or {}).get("name", "")
-    title = article.get("title", "") or ""
-    desc = article.get("description", "") or ""
-    combined = f"{title} {desc}"
-
-    # 1️⃣ Dictionary
-    key = src.lower().strip()
-    if key in CUSTOM_LOCATIONS:
-        log(f"📕 Dictionary source match: {key} → {CUSTOM_LOCATIONS[key]}")
-        return CUSTOM_LOCATIONS[key]
-
-    # 2️⃣ Dateline
-    dateline = extract_dateline_location(combined)
-    if dateline:
-        log(f"📰 Dateline match → {dateline}")
-        return dateline
-
-    # 3️⃣ Safer keyword matching
-    lower_text = combined.lower()
-    dict_items_sorted = sorted(CUSTOM_LOCATIONS.items(), key=lambda kv: -len(kv[0]))
-    for word, loc in dict_items_sorted:
-        if len(word) <= 2:
-            continue
-        pattern = r'\b' + re.escape(word.lower()) + r'\b'
-        if re.search(pattern, lower_text):
-            log(f"📗 Keyword match (word-boundary): {word} → {loc}")
-            return loc
-
-    # 4️⃣ Regex fallback
-    regex_hint = extract_location_hint(combined)
-    if regex_hint:
-        log(f"📍 Regex match → {regex_hint}")
-        return regex_hint
-
-    log("⚠️ No location found by any method.")
-    return None
-
-
 # ============================================================
-# 🌍 GEOLOCATION
+# 🌍 GEOLOCATORS
 # ============================================================
 try:
     geolocator_nom = Nominatim(user_agent="geomonitor_news_app")
@@ -142,50 +126,85 @@ except Exception as e:
     log(f"❌ Geocoder init failed: {e}")
     exit(1)
 
-
 def geocode_location(location_name: str):
     if not location_name:
         return None, None
-    location_name = location_name.strip().replace(" - ", ", ")
-    log(f"Attempting geocode for hint: '{location_name}'")
-    time.sleep(1.2)  # rate limit
-
-    # Try Nominatim
+    clean_name = (
+        location_name.strip()
+        .replace(" - ", ", ")
+        .replace("USA", "")
+        .replace("Inc.", "")
+        .replace("Headquarters", "")
+        .strip(", ")
+    )
+    log(f"Attempting geocode for hint: '{clean_name}'")
+    time.sleep(1.2)
     try:
-        loc = geolocator_nom.geocode(f"{location_name}, global", timeout=10)
+        loc = geolocator_nom.geocode(clean_name, timeout=10)
         if loc:
-            log(f"🗺️ Nominatim → '{location_name}' → ({loc.latitude:.4f}, {loc.longitude:.4f})")
+            log(f"🗺️ Nominatim → '{clean_name}' → ({loc.latitude:.4f}, {loc.longitude:.4f})")
             return loc.latitude, loc.longitude
-        else:
-            log(f"⚠️ Nominatim returned no result for '{location_name}'")
     except Exception as e:
-        log(f"⚠️ Nominatim error for '{location_name}': {e}")
+        log(f"⚠️ Nominatim error: {e}")
 
-    # Geoapify fallback
     if geolocator_geo:
         try:
-            loc = geolocator_geo.geocode(location_name, timeout=10)
+            loc = geolocator_geo.geocode(clean_name, timeout=10)
             if loc:
-                log(f"🌐 Geoapify → '{location_name}' → ({loc.latitude:.4f}, {loc.longitude:.4f})")
+                log(f"🌐 Geoapify → '{clean_name}' → ({loc.latitude:.4f}, {loc.longitude:.4f})")
                 return loc.latitude, loc.longitude
-            else:
-                log(f"⚠️ Geoapify returned no result for '{location_name}'")
         except Exception as e:
-            log(f"⚠️ Geoapify error for '{location_name}': {e}")
+            log(f"⚠️ Geoapify error: {e}")
 
     return None, None
 
+# ============================================================
+# 🔎 LOCATION RESOLUTION PIPELINE
+# ============================================================
+def resolve_location_name(article: dict):
+    src = (article.get("source", {}) or {}).get("name", "")
+    title = article.get("title", "") or ""
+    desc = article.get("description", "") or ""
+    combined = f"{title} {desc}"
+
+    key = src.lower().strip()
+    if key in CUSTOM_LOCATIONS:
+        log(f"📕 Dictionary source match: {key} → {CUSTOM_LOCATIONS[key]}")
+        return CUSTOM_LOCATIONS[key]
+
+    dateline = extract_dateline_location(combined)
+    if dateline:
+        log(f"📰 Dateline match → {dateline}")
+        return dateline
+
+    lower_text = combined.lower()
+    for word, loc in sorted(CUSTOM_LOCATIONS.items(), key=lambda kv: -len(kv[0])):
+        if len(word) <= 2:
+            continue
+        if re.search(rf"\b{re.escape(word.lower())}\b", lower_text):
+            log(f"📗 Keyword match → {word} → {loc}")
+            return loc
+
+    regex_hint = extract_location_hint(combined)
+    if regex_hint:
+        log(f"📍 Regex match → {regex_hint}")
+        return regex_hint
+
+    if AI_IS_ON:
+        guess = ai_guess_location(article)
+        if guess:
+            log(f"🧩 Using AI location guess: {guess}")
+            return guess
+
+    log("⚠️ No location found by any method.")
+    return None
 
 # ============================================================
 # 📰 FETCH NEWS
 # ============================================================
 def fetch_and_geocode_news():
-    url = (
-        f"https://newsapi.org/v2/everything?q=world&language=en&"
-        f"sortBy=publishedAt&pageSize=15&apiKey={NEWS_API_KEY}"
-    )
+    url = f"https://newsapi.org/v2/everything?q=world&language=en&sortBy=publishedAt&pageSize=15&apiKey={NEWS_API_KEY}"
     log(f"Fetching news: {url}")
-
     try:
         data = requests.get(url, timeout=20).json()
         articles = data.get("articles", [])
@@ -219,35 +238,28 @@ def fetch_and_geocode_news():
             }
     return events
 
-
 # ============================================================
-# 🔥 PUSH EVENTS
+# 🔥 PUSH TO FIREBASE
 # ============================================================
 def push_batch_events(new_events):
     fb_url = f"{FIREBASE_URL}/events.json"
     cutoff = datetime.utcnow() - timedelta(days=2)
-
     try:
         old = requests.get(fb_url, timeout=10).json() or {}
         log(f"Fetched {len(old)} existing events.")
-    except Exception as e:
-        log(f"⚠️ Could not fetch old data: {e}")
+    except Exception:
         old = {}
-
     kept = {}
     for key, ev in old.items():
+        ts = ev.get("timestamp")
+        if not ts:
+            continue
         try:
-            ts = ev.get("timestamp")
-            if not ts:
-                continue
-            ts_dt = datetime.fromisoformat(ts.replace("Z", ""))
-            if ts_dt > cutoff:
+            if datetime.fromisoformat(ts.replace("Z", "")) > cutoff:
                 kept[key] = ev
         except Exception:
             continue
-
     log(f"Keeping {len(kept)} old events (last 2 days).")
-
     merged = {**kept, **new_events}
     try:
         r = requests.put(fb_url, data=json.dumps(merged))
@@ -255,7 +267,6 @@ def push_batch_events(new_events):
         log(f"✅ PUSH COMPLETE: {len(merged)} total events.")
     except Exception as e:
         log(f"❌ PUSH FAILED: {e}")
-
 
 # ============================================================
 # 🚀 MAIN
