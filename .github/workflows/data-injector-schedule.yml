@@ -40,12 +40,12 @@ jobs:
             const key = process.env.MAPTILER_KEY || '';
             const out = tpl.replace(/YOUR_MAPTILER_API_KEY_HERE/g, key);
             fs.writeFileSync('dist/index.html', out, 'utf8');
-            console.log('Wrote dist/index.html (' + (key? 'MAPTILER_KEY injected' : 'NO KEY PROVIDED') + ')');
+            console.log('Wrote dist/index.html (' + (key ? 'MAPTILER_KEY injected' : 'NO KEY PROVIDED') + ')');
           "
           # copy static files
           cp app.js style.css crt.css dist/ || true
 
-      - name: Sanity check: ensure placeholder is gone
+      - name: "Sanity check: ensure placeholder is gone"
         run: |
           if grep -q "YOUR_MAPTILER_API_KEY_HERE" dist/index.html; then
             echo "ERROR: Placeholder STILL PRESENT in dist/index.html — aborting deployment"
