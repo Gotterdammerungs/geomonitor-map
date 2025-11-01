@@ -1,4 +1,4 @@
-name: Deploy Geomonitor to GitHub Pages (robust injection)
+name: Debug Build & Deploy
 
 on:
   push:
@@ -9,54 +9,49 @@ permissions:
   contents: write
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Show repo root (debug)
-        run: ls -la
-
-      - name: Prepare dist directory
+      - name: Show repo files before build
         run: |
-          rm -rf dist
-          mkdir -p dist
+          echo "== Repo root =="
+          ls -la
+          echo "== index.template.html exists? =="
+          test -f index.template.html && echo YES || echo NO
 
-      - name: Install Node (for robust templating)
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Inject MapTiler key into template (Node - safe)
+      - name: Inject MapTiler key (debug)
         env:
           MAPTILER_KEY: ${{ secrets.MAPTILER_KEY }}
         run: |
-          echo "Writing dist/index.html using Node (MAPTILER_KEY masked in logs)..."
-          node -e "
-            const fs = require('fs');
-            const tpl = fs.readFileSync('index.template.html','utf8');
-            const key = process.env.MAPTILER_KEY || '';
-            const out = tpl.replace(/YOUR_MAPTILER_API_KEY_HERE/g, key);
-            fs.writeFileSync('dist/index.html', out, 'utf8');
-            console.log('Wrote dist/index.html (' + (key ? 'MAPTILER_KEY injected' : 'NO KEY PROVIDED') + ')');
-          "
-          # copy static files
-          cp app.js style.css crt.css dist/ || true
-
-      - name: "Sanity check: ensure placeholder is gone"
-        run: |
-          if grep -q "YOUR_MAPTILER_API_KEY_HERE" dist/index.html; then
-            echo "ERROR: Placeholder STILL PRESENT in dist/index.html — aborting deployment"
-            echo "First 40 lines of dist/index.html:"
-            head -n 40 dist/index.html
+          mkdir -p dist
+          echo "== dist before =="
+          ls -la dist || true
+          echo "Replacing placeholder..."
+          if [ ! -f index.template.html ]; then
+            echo "ERROR: index.template.html not found!"
             exit 1
-          else
-            echo "OK: Placeholder not found in dist/index.html"
-            echo "First 10 lines of dist/index.html (key masked):"
-            head -n 10 dist/index.html
           fi
+          node -e "
+            const fs=require('fs');
+            const tpl=fs.readFileSync('index.template.html','utf8');
+            const key=process.env.MAPTILER_KEY||'';
+            const out=tpl.replace(/YOUR_MAPTILER_API_KEY_HERE/g,key);
+            fs.writeFileSync('dist/index.html',out);
+            console.log('Wrote dist/index.html length',out.length);
+          "
+          echo "== dist after =="
+          ls -la dist
+          head -n 15 dist/index.html || true
+
+      - name: Abort if placeholder still present
+        run: |
+          if grep -q 'YOUR_MAPTILER_API_KEY_HERE' dist/index.html; then
+            echo "Placeholder still present!"
+            exit 1
+          fi
+          echo "Placeholder replaced successfully."
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
