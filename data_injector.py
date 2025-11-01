@@ -32,13 +32,14 @@ FIREBASE_URL = os.environ.get(
 )
 NEWS_API_KEY = os.environ.get("NEWS_API_KEY")
 GEOAPIFY_KEY = os.environ.get("GEOAPIFY_KEY")
-AI_API_KEY = os.environ.get("AI_API_KEY", "")
+OPENROUTER_KEY = os.environ.get("OPENROUTER_API_KEY")
 AI_IS_ON = True  # toggle manually
 
 log("Booting Geomonitor Data Injector...")
 log(f"Firebase URL: {FIREBASE_URL}")
 log(f"NewsAPI key: {'✅ Present' if NEWS_API_KEY else '❌ Missing'}")
 log(f"Geoapify key: {'✅ Present' if GEOAPIFY_KEY else '⚠️ Missing'}")
+log(f"OpenRouter key: {'✅ Present' if OPENROUTER_KEY else '⚠️ Missing'}")
 
 if not NEWS_API_KEY:
     log("❌ Missing NEWS_API_KEY; cannot continue.")
@@ -63,28 +64,35 @@ PLACE_REGEX = re.compile(r"\b(?:in|at|near|from)\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-
 DATELINE_REGEX = re.compile(r"^\s*([A-Z][A-Z]+|[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)(?:\s*—|,)")
 
 # ============================================================
-# 🧠 AI FALLBACK
+# 🧠 AI FALLBACK (Mistral 7B via OpenRouter)
 # ============================================================
 def ai_guess_location(article):
-    """Ask a small AI model to guess a likely city or country."""
-    if not AI_IS_ON or not AI_API_KEY:
+    if not AI_IS_ON or not OPENROUTER_KEY:
         return None
+
     title = article.get("title", "")
     desc = article.get("description", "")
-    text = f"Title: {title}\nDescription: {desc}\n\nWhat city or country is this news most likely about? Return only the location name."
+    text = f"Title: {title}\nDescription: {desc}\n\nReturn only one likely city or country. You are forbidden to say anything alse. you must prioritise the city in which it happens, if you dont know, then return the province, or state, and if you cannot, then return the nation."
+
     try:
-        import openai
-        openai.api_key = AI_API_KEY
-        resp = openai.ChatCompletion.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are a location extraction assistant. Reply with only one location name."},
-                {"role": "user", "content": text},
-            ],
-            max_tokens=10,
-            temperature=0.3,
+        resp = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": "mistralai/mistral-7b-instruct",
+                "messages": [
+                    {"role": "system", "content": "You extract geographic locations, you are only allowed to answer a location, you will not, under any circumstance, say anything more, than the guessed location name.you must prioritise the city in which it happens, if you dont know, then return the province, or state, and if you cannot, then return the nation."},
+                    {"role": "user", "content": text},
+                ],
+                "max_tokens": 15,
+                "temperature": 0.2,
+            },
+            timeout=20,
         )
-        guess = resp["choices"][0]["message"]["content"].strip()
+        guess = resp.json()["choices"][0]["message"]["content"].strip()
         log(f"🧠 AI guessed location → {guess}")
         return guess
     except Exception as e:
@@ -200,19 +208,47 @@ def resolve_location_name(article: dict):
     return None
 
 # ============================================================
-# 📰 FETCH NEWS
+# 📰 FETCH NEWS (with relevance filter)
 # ============================================================
 def fetch_and_geocode_news():
-    url = f"https://newsapi.org/v2/everything?q=world&language=en&sortBy=publishedAt&pageSize=15&apiKey={NEWS_API_KEY}"
+    TOPICS = [
+        "geopolitics",
+        "international relations",
+        "war OR conflict",
+        "finance OR stock market OR economic crisis",
+        "technology OR AI OR semiconductor OR cyber attack",
+        "natural disaster OR earthquake OR hurricane"
+    ]
+    QUERY = " OR ".join(TOPICS)
+    url = f"https://newsapi.org/v2/everything?q={QUERY}&language=en&sortBy=publishedAt&pageSize=30&apiKey={NEWS_API_KEY}"
     log(f"Fetching news: {url}")
+
     try:
         data = requests.get(url, timeout=20).json()
         articles = data.get("articles", [])
-        log(f"Fetched {len(articles)} articles.")
+        log(f"Fetched {len(articles)} raw articles.")
     except Exception as e:
         log(f"❌ Failed to fetch: {e}")
         return {}
 
+    # -------- Filtering irrelevant fluff --------
+    REJECT_KEYWORDS = [
+        "recipe", "bake", "fashion", "celebrity", "film", "tv", "movie",
+        "video game", "football", "nba", "halloween", "netflix", "prime video",
+        "music", "album", "concert", "review", "sports", "holiday", "pets",
+        "horoscope", "dating", "lifestyle", "garden", "cooking", "travel"
+    ]
+    filtered = []
+    for art in articles:
+        title = (art.get("title") or "").lower()
+        desc = (art.get("description") or "").lower()
+        if any(bad in title or bad in desc for bad in REJECT_KEYWORDS):
+            continue
+        filtered.append(art)
+    articles = filtered
+    log(f"Filtered down to {len(articles)} relevant articles.")
+
+    # -------- Process and geocode --------
     events = {}
     for i, art in enumerate(articles):
         title = art.get("title", "Untitled").strip()
