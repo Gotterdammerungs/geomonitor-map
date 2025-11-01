@@ -1,3 +1,7 @@
+// ============================
+// 🌍 GEOMONITOR MAP FRONTEND
+// ============================
+
 // Global variables
 let activeMarkers = {};
 let map;
@@ -14,7 +18,6 @@ function initMap() {
     }).addTo(map);
 
     console.log("🗺️ Map initialized.");
-
     setupRealtimeListener();
 }
 
@@ -29,7 +32,7 @@ function getTopicColor(topic) {
             return "red";
         case "economy":
         case "finance":
-            return "green";
+            return "limegreen";
         case "technology":
         case "cyber":
         case "science":
@@ -43,15 +46,18 @@ function getTopicColor(topic) {
     }
 }
 
-// 3. Define visibility by importance (zoom threshold)
+// 3. Visibility by importance (zoom threshold)
+// The AI’s "importance" field acts as PRIORITY (1–5)
+// Higher importance = visible from farther out
 function getMinZoomForImportance(importance) {
-    switch (parseInt(importance)) {
-        case 5: return 0;  // global
-        case 4: return 3;
-        case 3: return 5;
-        case 2: return 7;
+    const imp = parseInt(importance) || 3;
+    switch (imp) {
+        case 5: return 0;  // major global news
+        case 4: return 3;  // regional/global
+        case 3: return 5;  // medium importance
+        case 2: return 7;  // local/regional
         case 1:
-        default: return 9; // local
+        default: return 9; // minor/local events
     }
 }
 
@@ -72,16 +78,21 @@ function setupRealtimeListener() {
             return;
         }
 
-        console.log(`📡 Received ${Object.keys(events).length} events.`);
+        const count = Object.keys(events).length;
+        console.log(`📡 Received ${count} event${count !== 1 ? "s" : ""}.`);
 
         Object.entries(events).forEach(([key, event]) => {
             if (!event.lat || !event.lon) return;
 
-            const { lat, lon, title, description, type, importance, topic, url } = event;
+            const {
+                lat, lon, title, description,
+                type, importance, topic, url
+            } = event;
 
             const color = getTopicColor(topic);
             const minZoom = getMinZoomForImportance(importance);
 
+            // Create marker
             const marker = L.circleMarker([lat, lon], {
                 radius: 7,
                 color,
@@ -90,13 +101,22 @@ function setupRealtimeListener() {
                 weight: 1.5
             });
 
+            // Build popup content
             const popupHTML = `
-                <div style="font-family:sans-serif;color:#fff;max-width:250px;">
-                    <div class="news-title">${title || "Untitled"}</div>
-                    <div class="news-source">${type || "Unknown Source"}</div>
-                    <div class="news-topic">Topic: ${topic || "N/A"} | Importance: ${importance || "?"}</div>
-                    <div class="news-desc">${description || ""}</div>
-                    ${url ? `<a href="${url}" target="_blank" class="news-link">Read full article →</a>` : ""}
+                <div style="font-family:sans-serif;color:#fff;max-width:260px;line-height:1.3;">
+                    <div class="news-title" style="font-weight:600;font-size:15px;color:#f9fafb;margin-bottom:5px;">
+                        ${title || "Untitled"}
+                    </div>
+                    <div class="news-source" style="font-size:12px;color:#9ca3af;margin-bottom:4px;">
+                        ${type || "Unknown Source"}
+                    </div>
+                    <div class="news-topic" style="font-size:13px;color:#d1d5db;margin-bottom:4px;">
+                        Topic: ${topic || "N/A"} | Priority: ${importance || "?"}
+                    </div>
+                    <div class="news-desc" style="font-size:13px;color:#cbd5e1;margin-bottom:6px;">
+                        ${description || ""}
+                    </div>
+                    ${url ? `<a href="${url}" target="_blank" style="color:#60a5fa;text-decoration:none;font-weight:600;">Read full article →</a>` : ""}
                 </div>
             `;
 
@@ -105,12 +125,13 @@ function setupRealtimeListener() {
             marker.addTo(map);
         });
 
+        // Update marker visibility based on zoom level
         updateMarkerVisibility();
         map.on("zoomend", updateMarkerVisibility);
     });
 }
 
-// 5. Update marker visibility based on zoom
+// 5. Show/hide markers according to zoom level and importance
 function updateMarkerVisibility() {
     const zoom = map.getZoom();
     Object.values(activeMarkers).forEach(({ marker, minZoom }) => {
