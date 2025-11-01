@@ -60,7 +60,7 @@ jobs:
             exit 1
           fi
           cp index.html index.html.deploy
-          # Replace placeholder with actual key safely
+          # Use perl for literal substitution (handles /, +, &, etc.)
           perl -pe 's/MAPTILER_KEY_PLACEHOLDER/$ENV{MAPTILER_KEY}/g' index.html > index.html.deploy
           head -n 15 index.html.deploy
           mv index.html.deploy index.html
@@ -68,7 +68,7 @@ jobs:
 
       - name: 🪣 Prepare deployment folder
         run: |
-          mkdir public
+          mkdir -p public
           cp -r index.html app.js style.css dictionary.json public/ || true
           echo "✅ Files ready for deploy:"
           ls -al public/
