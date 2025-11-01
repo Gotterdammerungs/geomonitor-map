@@ -1,148 +1,99 @@
 let activeMarkers = {};
-let map;
-let darkTiles, lightTiles;
+let map, darkTiles, lightTiles;
 
 function initMap() {
-  // Initialize map and base layers
   map = L.map('map').setView([20, 0], 2);
 
   darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 12,
+    attribution: '&copy; OpenStreetMap & CARTO',
+    subdomains: 'abcd', maxZoom: 12,
   });
-
   lightTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 12,
+    attribution: '&copy; OpenStreetMap & CARTO',
+    subdomains: 'abcd', maxZoom: 12,
   });
 
-  // Load preferred theme tiles
-  const savedTheme = localStorage.getItem("theme") || "dark";
-  if (savedTheme === "light") {
-    lightTiles.addTo(map);
-  } else {
-    darkTiles.addTo(map);
-  }
+  const theme = localStorage.getItem("theme") || "dark";
+  if (theme === "light") lightTiles.addTo(map); else darkTiles.addTo(map);
+  document.body.classList.toggle("light", theme === "light");
+  document.body.classList.toggle("dark", theme === "dark");
 
   setupRealtimeListener();
-  setupPanelControls();
+  setupPanelControls(theme);
 }
 
-// ------------- Topic Colors -------------
-function getTopicColor(topic) {
-  topic = (topic || "").toLowerCase();
-  switch (topic) {
-    case "geopolitics": case "conflict": case "diplomacy": case "security": return "red";
-    case "economy": case "finance": return "limegreen";
-    case "technology": case "cyber": case "science": return "deepskyblue";
-    case "environment": case "disaster": case "energy": return "orange";
-    default: return "white";
-  }
+function getTopicColor(t) {
+  t = (t || "").toLowerCase();
+  if (["geopolitics","conflict","diplomacy","security"].includes(t)) return "red";
+  if (["economy","finance"].includes(t)) return "limegreen";
+  if (["technology","cyber","science"].includes(t)) return "deepskyblue";
+  if (["environment","disaster","energy"].includes(t)) return "orange";
+  return "white";
+}
+function getMinZoomForImportance(i) {
+  const z = parseInt(i)||3; return {5:0,4:3,3:5,2:7,1:9}[z]||9;
 }
 
-function getMinZoomForImportance(importance) {
-  const imp = parseInt(importance) || 3;
-  return {5:0,4:3,3:5,2:7,1:9}[imp] ?? 9;
-}
-
-// ------------- Firebase Data -------------
 function setupRealtimeListener() {
   const dbRef = firebase.database().ref('/events');
-  const clearMarkers = () => { Object.values(activeMarkers).forEach(({ marker }) => map.removeLayer(marker)); activeMarkers = {}; };
-
-  dbRef.on('value', (snapshot) => {
+  const clearMarkers = ()=>{Object.values(activeMarkers).forEach(({marker})=>map.removeLayer(marker));activeMarkers={};};
+  dbRef.on('value', s=>{
     clearMarkers();
-    const events = snapshot.val();
-    if (!events) return;
-
-    Object.entries(events).forEach(([key, event]) => {
-      if (!event.lat || !event.lon) return;
-      const { lat, lon, title, description, type, importance, topic, url } = event;
-
-      const color = getTopicColor(topic);
-      const minZoom = getMinZoomForImportance(importance);
-
-      const marker = L.circleMarker([lat, lon], {
-        radius: 7,
-        color, fillColor: color, fillOpacity: 0.85, weight: 1.5
-      });
-
-      const popupHTML = `
+    const events = s.val(); if(!events) return;
+    Object.entries(events).forEach(([k,e])=>{
+      if(!e.lat||!e.lon) return;
+      const m = L.circleMarker([e.lat,e.lon],{
+        radius:7,color:getTopicColor(e.topic),
+        fillColor:getTopicColor(e.topic),fillOpacity:0.85,weight:1.5
+      }).bindPopup(`
         <div>
-          <div class="news-title">${title || "Untitled"}</div>
-          <div class="news-source">${type || "Unknown Source"}</div>
-          <div class="news-topic">Topic: ${topic || "N/A"} | Importance: ${importance || "?"}</div>
-          <div class="news-desc">${description || ""}</div>
-          ${url ? `<a href="${url}" target="_blank" class="news-link">Read full article →</a>` : ""}
-        </div>`;
-
-      marker.bindPopup(popupHTML);
-      activeMarkers[key] = { marker, minZoom };
-      marker.addTo(map);
+          <strong>${e.title||"Untitled"}</strong><br>
+          <em>${e.type||"Unknown"}</em><br>
+          Topic: ${e.topic||"N/A"} | Importance: ${e.importance||"?"}<br>
+          ${e.url?`<a href="${e.url}" target="_blank">Read →</a>`:""}
+        </div>`);
+      activeMarkers[k]={marker:m,minZoom:getMinZoomForImportance(e.importance)};
+      m.addTo(map);
     });
-
-    updateMarkerVisibility();
     map.on("zoomend", updateMarkerVisibility);
+    updateMarkerVisibility();
+  });
+}
+function updateMarkerVisibility(){
+  const z = map.getZoom();
+  Object.values(activeMarkers).forEach(({marker,minZoom})=>{
+    if(z>=minZoom){if(!map.hasLayer(marker))map.addLayer(marker);}
+    else if(map.hasLayer(marker))map.removeLayer(marker);
   });
 }
 
-function updateMarkerVisibility() {
-  const zoom = map.getZoom();
-  Object.values(activeMarkers).forEach(({ marker, minZoom }) => {
-    if (zoom >= minZoom) {
-      if (!map.hasLayer(marker)) map.addLayer(marker);
-    } else if (map.hasLayer(marker)) map.removeLayer(marker);
-  });
-}
-
-// ------------- Panel Controls -------------
-function setupPanelControls() {
-  const panelToggle = document.getElementById("panel-toggle");
+function setupPanelControls(theme){
   const panel = document.getElementById("panel");
-  const themeBtn = document.getElementById("theme-toggle");
-  const crtSlider = document.getElementById("crt-intensity");
+  document.getElementById("panel-toggle").onclick=()=>panel.classList.toggle("hidden");
+  const themeBtn=document.getElementById("theme-toggle");
+  const crtSlider=document.getElementById("crt-intensity");
 
-  panelToggle.addEventListener("click", () => panel.classList.toggle("hidden"));
+  // CRT
+  const saved=parseFloat(localStorage.getItem("crt_intensity")||"0.5");
+  crtSlider.value=saved;
+  document.documentElement.style.setProperty("--crt-opacity",saved);
+  crtSlider.oninput=e=>{
+    const val=parseFloat(e.target.value);
+    document.documentElement.style.setProperty("--crt-opacity",val);
+    localStorage.setItem("crt_intensity",val);
+  };
 
-  // Restore and update CRT intensity
-  let crtValue = parseFloat(localStorage.getItem("crt_intensity") || "0.5");
-  crtSlider.value = crtValue;
-  document.documentElement.style.setProperty("--crt-opacity", crtValue);
-
-  crtSlider.addEventListener("input", e => {
-    const val = parseFloat(e.target.value);
-    localStorage.setItem("crt_intensity", val.toFixed(2));
-    document.documentElement.style.setProperty("--crt-opacity", val);
-    document.body.style.setProperty("--crt-opacity", val);
-  });
-
-  // Theme toggle (switch tiles)
-  themeBtn.addEventListener("click", () => {
-    const isDark = document.body.classList.contains("dark");
-    document.body.classList.toggle("dark", !isDark);
-    document.body.classList.toggle("light", isDark);
-    localStorage.setItem("theme", isDark ? "light" : "dark");
-
-    if (isDark) {
-      map.removeLayer(darkTiles);
-      lightTiles.addTo(map);
-      themeBtn.textContent = "☀️ Light Mode";
-    } else {
-      map.removeLayer(lightTiles);
-      darkTiles.addTo(map);
-      themeBtn.textContent = "🌙 Dark Mode";
-    }
-  });
-
-  // Restore theme preference
-  const savedTheme = localStorage.getItem("theme") || "dark";
-  document.body.classList.toggle("dark", savedTheme === "dark");
-  document.body.classList.toggle("light", savedTheme === "light");
-  themeBtn.textContent = savedTheme === "dark" ? "🌙 Dark Mode" : "☀️ Light Mode";
+  // Theme
+  const setTheme=(mode)=>{
+    localStorage.setItem("theme",mode);
+    document.body.classList.toggle("dark",mode==="dark");
+    document.body.classList.toggle("light",mode==="light");
+    if(mode==="dark"){map.removeLayer(lightTiles);darkTiles.addTo(map);}
+    else{map.removeLayer(darkTiles);lightTiles.addTo(map);}
+    themeBtn.textContent=mode==="dark"?"🌙 Dark Mode":"☀️ Light Mode";
+  };
+  themeBtn.onclick=()=>setTheme(document.body.classList.contains("dark")?"light":"dark");
+  setTheme(theme);
 }
 
 initMap();
