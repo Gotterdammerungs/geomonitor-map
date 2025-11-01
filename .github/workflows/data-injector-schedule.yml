@@ -2,8 +2,7 @@ name: Geomonitor Data Injector + Site Deploy
 
 on:
   schedule:
-    # Runs every 5 minutes
-    - cron: '*/5 * * * *'
+    - cron: '*/5 * * * *'   # every 5 minutes
   workflow_dispatch:
 
 jobs:
@@ -12,19 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout your repository
       - uses: actions/checkout@v4
 
-      # 2️⃣ Set up Python
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
-      # 3️⃣ Install dependencies
       - name: Install Python dependencies
         run: pip install requests geopy python-dotenv
 
-      # 4️⃣ Run your data injector
       - name: Run Data Injector Script
         env:
           FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
@@ -41,13 +36,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 1️⃣ Create config.json in the root (where index.html and app.js live)
-      - name: Inject MapTiler key into config.json
+      # 1️⃣ Generate config.json with your secret key
+      - name: Create config.json securely
         run: |
           echo "{\"maptiler_key\": \"${{ secrets.MAPTILER_KEY }}\"}" > config.json
           echo "✅ config.json created in repo root"
 
-      # 2️⃣ Deploy everything to GitHub Pages
+      # 2️⃣ Deploy everything (including config.json) to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
