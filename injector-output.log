@@ -1,104 +1,122 @@
-[10:56:24] Booting Geomonitor Data Injector...
-[10:56:24] Firebase URL: https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app
-[10:56:24] NewsAPI key: ✅ Present
-[10:56:24] Geoapify key: ✅ Present
-[10:56:24] OpenRouter key: ✅ Present
-[10:56:24] ✅ Initialized Nominatim geocoder (Geoapify unavailable).
-[10:56:24] === Starting Data Injection Job ===
-[10:56:24] Fetching news: https://newsapi.org/v2/everything?q=geopolitics%20OR%20international%20relations%20OR%20war%20OR%20conflict%20OR%20finance%20OR%20stock%20market%20OR%20economic%20crisis%20OR%20technology%20OR%20AI%20OR%20semiconductor%20OR%20cyber%20attack%20OR%20natural%20disaster%20OR%20earthquake%20OR%20hurricane&language=en&sortBy=publishedAt&pageSize=30&apiKey=7f0c06cb96494e1ca7e86eace438fd29
-[10:56:25] Fetched 29 raw articles.
-[10:56:25] Filtered down to 26 articles.
-[10:56:25] 
-[1/26] China signals easing of Nexperia semiconductor export ban - Financial Times
-[10:56:25] → show=True, topic=tech, importance=4
-[10:56:25] 🧠 AI location guess → Beijing, China
-[10:56:27] 🗺️ Nominatim → Beijing, China → (40.1906, 116.4121)
-[10:56:27] 
-[2/26] US trade pact does not force M'sia into blind compliance, says Tengku Zafrul
-[10:56:27] → show=False, topic=other, importance=2
-[10:56:27] 
-[3/26] Pet Health Products Market, By Application
-[10:56:27] → show=False, topic=other, importance=1
-[10:56:27] 
-[4/26] The Brokerage That Makes More From Fewer Clients: Is Interactive Brokers Still Undervalued?
-[10:56:27] → show=True, topic=finance, importance=4
-[10:56:28] 🧠 AI location guess → <s> [OUT] Interactive Brokers is a company based in Greenwich, Connecticut, USA.
-[10:56:29] 
-[5/26] Man narrowly avoids disaster as 'one-in-a-billion' meteorite smashes into windscreen while driving brand new Tesla
-[10:56:29] → show=False, topic=disaster, importance=1
-[10:56:29] 
-[6/26] Public school districts coast to coast adopting radical curriculum from org named for 60s radical
-[10:56:29] → show=True, topic=social, importance=4
-[10:56:30] 🧠 AI location guess → Washington, D.C., USA (based on the context of the public school districts being in the
-[10:56:31] 
-[7/26] Carney says he told Ontario premier not to run anti-tariff ad, apologized to Trump
-[10:56:31] → show=True, topic=geopolitics, importance=3
-[10:56:32] 🧠 AI location guess → Ontario, Canada (based on the mention of Ontario Premier Doug Ford)
-[10:56:33] 
-[8/26] US offer of assistance to Asean must be based on ADMM framework
-[10:56:33] → show=False, topic=other, importance=2
-[10:56:33] 
-[9/26] India’s net GST collection stays flat in October; gross up 4.6%
-[10:56:33] → show=False, topic=other, importance=2
-[10:56:33] 
-[10/26] Bengaluru techie's one irrational decision turned his business into a global brand in six years. 'Everyone thought I had lost it'
-[10:56:33] → show=False, topic=social, importance=1
-[10:56:33] 
-[11/26] New Casio Pro Trek 30th anniversary watches with gold accents unveiled
-[10:56:33] → show=False, topic=other, importance=2
-[10:56:33] 
-[12/26] Bharat Narang on his role in Satyaa Sachee: Vikrant allows me to step out of my comfort zone and try something different
-[10:56:33] → show=False, topic=other, importance=1
-[10:56:33] 
-[13/26] Give up 'failed path' of armed struggle, join mainstream: Surrendered Naxal Bhupathi to comrades
-[10:56:33] → show=True, topic=geopolitics, importance=3
-[10:56:33] 🧠 AI location guess → Gadchiroli, India
-[10:56:33] 
-[14/26] Woman Aghast as 14 Data Centers Move Next Door, Emits Terrible Stench
-[10:56:33] → show=False, topic=other, importance=2
-[10:56:33] 
-[15/26] Overton Window Speedrun: British Voters Now More Right-Wing on Immigration Than Americans
-[10:56:33] → show=True, topic=geopolitics, importance=4
-[10:56:34] 🧠 AI location guess → <s> [OUT] United Kingdom
-[10:56:34] 
-[16/26] Nvidia emerges as TSMC's first A16 customer, while Apple may skip to A14
-[10:56:34] → show=False, topic=other, importance=2
-[10:56:34] 
-[17/26] US urges ASEAN to be firm in countering China in the South China Sea
-[10:56:34] → show=True, topic=geopolitics, importance=5
-[10:56:35] 🧠 AI location guess → Beijing, China (for China) and Washington, D.C., USA (for the United States
-[10:56:37] 
-[18/26] I'm the CEO behind the New York Marathon. Here's how we pull off the world's biggest race.
-[10:56:37] → show=False, topic=other, importance=1
-[10:56:37] 
-[19/26] Asean reaffirms 'no nukes' stance, says Defence Minister
-[10:56:37] → show=True, topic=geopolitics, importance=4
-[10:56:38] 🧠 AI location guess → <s> [OUT] Kuala Lumpur, Malaysia
-[10:56:40] 
-[20/26] Housing market inventory shift: 17 states where buyers are winning back power
-[10:56:40] → show=False, topic=other, importance=1
-[10:56:40] 
-[21/26] BYD's October vehicle sales down 12% from year earlier
-[10:56:40] → show=True, topic=tech, importance=2
-[10:56:41] 🧠 AI location guess → <s> [OUT] China
-[10:56:41] 
-[22/26] IonQ: Quantum Progress Meets Market Reality
-[10:56:41] → show=False, topic=tech, importance=3
-[10:56:41] 
-[23/26] Jamaican town reduced to rubble by Hurricane Melissa
-[10:56:41] → show=False, topic=other, importance=2
-[10:56:41] 
-[24/26] Taiwan’s quantum talent gap widens as Dutch model highlights what’s missing
-[10:56:41] → show=True, topic=tech, importance=4
-[10:56:41] 🧠 AI location guess → Taiwan
-[10:56:43] 🗺️ Nominatim → Taiwan → (23.9739, 120.9820)
-[10:56:43] 
-[25/26] BYD's October vehicle sales down 12% from year earlier
-[10:56:43] → show=False, topic=other, importance=2
-[10:56:43] 
-[26/26] This Simple Habit Can Improve Focus & Concentration, Study Finds
-[10:56:43] → show=False, topic=social, importance=1
-[10:56:44] ⚠️ GDACS feed is not XML (HTML or error returned).
-[10:56:45] Fetched 181 old events.
-[10:56:46] ✅ PUSH COMPLETE: 186 total events.
-[10:56:46] === Job Complete ===
+[11:01:58] Booting Geomonitor Data Injector...
+[11:01:58] Firebase URL: https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app
+[11:01:58] NewsAPI key: ✅ Present
+[11:01:58] Geoapify key: ✅ Present
+[11:01:58] OpenRouter key: ✅ Present
+[11:01:58] ✅ Initialized Nominatim geocoder (Geoapify unavailable).
+[11:01:58] === Starting Data Injection Job ===
+[11:01:58] Fetching news: https://newsapi.org/v2/everything?q=geopolitics%20OR%20international%20relations%20OR%20war%20OR%20conflict%20OR%20finance%20OR%20stock%20market%20OR%20economic%20crisis%20OR%20technology%20OR%20AI%20OR%20semiconductor%20OR%20cyber%20attack%20OR%20natural%20disaster%20OR%20earthquake%20OR%20hurricane&language=en&sortBy=publishedAt&pageSize=30&apiKey=7f0c06cb96494e1ca7e86eace438fd29
+[11:01:58] Fetched 27 raw articles.
+[11:01:58] Filtered down to 26 articles.
+[11:01:58] 
+[1/26] Ognissanti, in Spagna la visita ai cari defunti
+[11:01:59] 🧠 AI classify → show=false; topic=social; importance=1
+[11:01:59] → show=False, topic=social, importance=1
+[11:01:59] 
+[2/26] Urban Company revenues jump 37% even as it posts losses
+[11:01:59] 🧠 AI classify → 
+[11:01:59] → show=False, topic=other, importance=2
+[11:01:59] 
+[3/26] 8 ways to help your teams build lasting responsible AI
+[11:02:00] 🧠 AI classify → show=false; topic=tech; importance=3
+[11:02:00] → show=False, topic=tech, importance=3
+[11:02:00] 
+[4/26] Dogecoin Enters The Big Leagues — Stadium And Jerseys Get A Crypto Makeover
+[11:02:00] 🧠 AI classify → 
+[11:02:00] → show=False, topic=other, importance=2
+[11:02:00] 
+[5/26] Louis Têtu: Why Canada has to get artificial intelligence right
+[11:02:00] 🧠 AI classify → 
+[11:02:00] → show=False, topic=other, importance=2
+[11:02:00] 
+[6/26] ChatGPT Atlas AI Browser : The Future of Surfing the Web
+[11:02:01] 🧠 AI classify → show=false; topic=tech; importance=3
+[11:02:01] → show=False, topic=tech, importance=3
+[11:02:01] 
+[7/26] A doctor’s fight to repair, not replace
+[11:02:02] 🧠 AI classify → show=false; topic=science; importance=3
+[11:02:02] → show=False, topic=science, importance=3
+[11:02:02] 
+[8/26] Nvidia's dizzying week of dealmaking
+[11:02:02] 🧠 AI classify → show=true
+topic=tech
+importance=4
+[11:02:02] → show=True, topic=tech, importance=4
+[11:02:03] 🧠 AI location guess → <s> [OUT] Santa Clara, USA
+[11:02:05] 🗺️ Nominatim → <s> [OUT] Santa Clara, USA → (37.3366, -121.8901)
+[11:02:05] 
+[9/26] My Hero Academia's Successor Is Already Here: Meet To Be Hero X
+[11:02:06] 🧠 AI classify → show=false; topic=other; importance=1 s
+[11:02:06] → show=False, topic=other, importance=1
+[11:02:06] 
+[10/26] This open-source bookmarks sync tool just freed me from Google Chrome
+[11:02:06] 🧠 AI classify → show=false; topic=tech; importance=1
+[11:02:06] → show=False, topic=tech, importance=1
+[11:02:06] 
+[11/26] 27 Shoes For Anyone Who Wants Comfy Feet But Doesn’t Want Sneakers
+[11:02:07] 🧠 AI classify → 
+[11:02:07] → show=False, topic=other, importance=2
+[11:02:07] 
+[12/26] 'Mankeeping' Might Explain Why More Straight Women Are Staying Single
+[11:02:08] 🧠 AI classify → show=false; topic=social; importance=1
+[11:02:08] → show=False, topic=social, importance=1
+[11:02:08] 
+[13/26] Too Cold Or Dark Outside To Walk? Try This Instead.
+[11:02:08] 🧠 AI classify → show=false; topic=other; importance=1 s
+[11:02:08] → show=False, topic=other, importance=1
+[11:02:08] 
+[14/26] 'Orthosomnia' Might Be Ruining Your Sleep. Here's What You Should Know.
+[11:02:09] 🧠 AI classify → show=false; topic=other; importance=1 s
+[11:02:09] → show=False, topic=other, importance=1
+[11:02:09] 
+[15/26] These People ‘Convinced’ Their Partner To Have Kids. Here's How That Worked Out For Them.
+[11:02:10] 🧠 AI classify → show=false; topic=social; importance=1 s
+[11:02:10] → show=False, topic=social, importance=1
+[11:02:10] 
+[16/26] Taiwan solar maker pushes storm-proof technology and niche strategy in U.S. and Japan markets
+[11:02:10] 🧠 AI classify → 
+[11:02:10] → show=False, topic=other, importance=2
+[11:02:10] 
+[17/26] Verizon is in crisis: Here’s what its new CEO must do to turn things around
+[11:02:11] 🧠 AI classify → 
+[11:02:11] → show=False, topic=other, importance=2
+[11:02:11] 
+[18/26] Warning to rest of NFL: Davante Adams-Matthew Stafford attack heating up for Rams
+[11:02:11] 🧠 AI classify → show=false; topic=other; importance=1
+[11:02:11] → show=False, topic=other, importance=1
+[11:02:11] 
+[19/26] The Slow Death of Special Education
+[11:02:13] 🧠 AI classify → show=false; topic=social; importance=3
+[11:02:13] → show=False, topic=social, importance=3
+[11:02:13] 
+[20/26] Self-Forgetfulness: George Kinder’s Key To Finding—And Being—A True Fiduciary
+[11:02:14] 🧠 AI classify → show=false; topic=finance; importance=2
+[11:02:14] → show=False, topic=finance, importance=2
+[11:02:14] 
+[21/26] Your Moral Code Has Christian Roots Whether You Know It or Not
+[11:02:14] 🧠 AI classify → show=false; topic=social; importance=1
+[11:02:14] → show=False, topic=social, importance=1
+[11:02:14] 
+[22/26] Two Apple devices you really shouldn't buy this month (and 9 that are safe for now)
+[11:02:15] 🧠 AI classify → show=false; topic=tech; importance=2
+[11:02:15] → show=False, topic=tech, importance=2
+[11:02:15] 
+[23/26] Mutuum Finance (MUTM) Completes Roadmap Phase 1 as V1 Protocol Launch Nears
+[11:02:15] 🧠 AI classify → 
+[11:02:15] → show=False, topic=other, importance=2
+[11:02:15] 
+[24/26] How Childhood Relationships Affect Your Adult Attachment Style, according to Large New Study
+[11:02:16] 🧠 AI classify → show=false; topic=social; importance=1 s
+[11:02:16] → show=False, topic=social, importance=1
+[11:02:16] 
+[25/26] Penn State vs. Ohio State prediction: Odds, picks, best bet for Big Ten clash
+[11:02:16] 🧠 AI classify → show=false; topic=other; importance=1 s
+[11:02:16] → show=False, topic=other, importance=1
+[11:02:16] 
+[26/26] The ‘10 Martini’ Proof Connects Quantum Mechanics With Infinitely Intricate Mathematical Structures
+[11:02:17] 🧠 AI classify → show=false; topic=science; importance=1
+[11:02:17] → show=False, topic=science, importance=1
+[11:02:18] ⚠️ GDACS feed is not XML (HTML or error returned).
+[11:02:19] Fetched 186 old events.
+[11:02:20] ✅ PUSH COMPLETE: 187 total events.
+[11:02:20] === Job Complete ===
