@@ -29,17 +29,17 @@ jobs:
           echo "Listing all files and types (first 200):"
           find . -maxdepth 3 -type f | sed -n '1,200p' || true
 
-      - name: Set up Python
+      - name: "Set up Python"
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
-      - name: Install deps (minimal)
+      - name: "Install deps (minimal)"
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; else pip install requests geopy; fi
 
-      - name: Preflight: ensure injector file exists
+      - name: "Preflight: ensure injector file exists"
         run: |
           if [ ! -f ./data_injector.py ]; then
             echo "ERROR: ./data_injector.py not found" >&2
@@ -47,13 +47,13 @@ jobs:
           fi
           echo "data_injector.py exists."
 
-      - name: Preflight: syntax-check injector (py_compile)
+      - name: "Preflight: syntax-check injector (py_compile)"
         run: |
           echo "Checking Python syntax with py_compile..."
           python -m py_compile data_injector.py
           echo "py_compile OK."
 
-      - name: Run data injector (explicit)
+      - name: "Run data injector (explicit)"
         id: run_injector
         run: |
           echo "=== Running data_injector.py ==="
@@ -65,7 +65,7 @@ jobs:
           GEOAPIFY_KEY: ${{ secrets.GEOAPIFY_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
 
-      - name: Upload injector logs on failure
+      - name: "Upload injector logs on failure"
         if: failure()
         uses: actions/upload-artifact@v4
         with:
