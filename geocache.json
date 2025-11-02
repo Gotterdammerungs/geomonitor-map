@@ -1,0 +1,30 @@
+{
+  "gadchiroli, india": {
+    "lat": 19.7590704,
+    "lon": 80.1622807
+  },
+  "<s> [out] united kingdom": {
+    "lat": 52.7455979,
+    "lon": 0.4014539
+  },
+  "<s> [out] china": {
+    "lat": 22.2776561,
+    "lon": 114.167956
+  },
+  "kuala lumpur": {
+    "lat": 3.1526589,
+    "lon": 101.7022205
+  },
+  "<s> [out] taiwan": {
+    "lat": 25.0546481,
+    "lon": 121.8063606
+  },
+  "manama, bahrain": {
+    "lat": 26.2235041,
+    "lon": 50.5822436
+  },
+  "bulgaria": {
+    "lat": 42.6073975,
+    "lon": 25.4856617
+  }
+}
