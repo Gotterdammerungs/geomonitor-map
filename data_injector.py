@@ -1,48 +1,30 @@
 #!/usr/bin/env python3
 """
 Geomonitor Data Injector
-Fetches filtered news from NewsAPI, classifies with OpenRouter (Mistral 7B),
-geocodes with Nominatim/Geoapify, and pushes results to Firebase.
-Also fetches live hurricane data from GDACS.
+Fetches geopolitical news, classifies it, geocodes, adds live hurricanes from GDACS, and pushes all to Firebase.
 """
 
 import os
 import time
 import json
 import re
-import xml.etree.ElementTree as ET
 import requests
+import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 
 # ---------------------------
-# Safe geopy imports
-# ---------------------------
-try:
-    from geopy.geocoders import Nominatim, Geoapify
-    GEOAPIFY_AVAILABLE = True
-except ImportError:
-    from geopy.geocoders import Nominatim
-    Geoapify = None
-    GEOAPIFY_AVAILABLE = False
-
-from geopy.exc import GeocoderTimedOut, GeocoderServiceError
-
-
-# ---------------------------
-# Logging helper
+# Logging
 # ---------------------------
 def log(msg: str):
     print(f"[{datetime.utcnow().strftime('%H:%M:%S')}] {msg}")
-
 
 # ---------------------------
 # Config
 # ---------------------------
 FIREBASE_URL = os.environ.get(
     "FIREBASE_URL",
-    "https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app/",
+    "https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app/"
 ).rstrip("/")
-
 NEWS_API_KEY = os.environ.get("NEWS_API_KEY")
 GEOAPIFY_KEY = os.environ.get("GEOAPIFY_KEY")
 OPENROUTER_KEY = os.environ.get("OPENROUTER_API_KEY")
@@ -56,6 +38,16 @@ GEOCACHE_PATH = os.path.join(BASE_DIR, "geocache.json")
 CLASSIFY_CACHE_PATH = os.path.join(BASE_DIR, "classify_cache.json")
 
 try:
+    from geopy.geocoders import Nominatim, Geoapify
+    GEOAPIFY_AVAILABLE = True
+except ImportError:
+    from geopy.geocoders import Nominatim
+    GEOAPIFY_AVAILABLE = False
+
+# ---------------------------
+# Load caches
+# ---------------------------
+try:
     with open(GEOCACHE_PATH, "r", encoding="utf-8") as f:
         GEOCACHE = json.load(f)
 except Exception:
@@ -67,6 +59,9 @@ try:
 except Exception:
     CLASSIFY_CACHE = {}
 
+# ---------------------------
+# Startup Log
+# ---------------------------
 log("Booting Geomonitor Data Injector...")
 log(f"Firebase URL: {FIREBASE_URL}")
 log(f"NewsAPI key: {'✅ Present' if NEWS_API_KEY else '❌ Missing'}")
@@ -76,54 +71,8 @@ log(f"OpenRouter key: {'✅ Present' if OPENROUTER_KEY else '⚠️ Missing'}")
 if not NEWS_API_KEY:
     raise SystemExit("❌ NEWS_API_KEY missing.")
 
-
 # ---------------------------
-# Load dictionary
-# ---------------------------
-DICTIONARY_PATH = os.path.join(BASE_DIR, "dictionary.json")
-try:
-    with open(DICTIONARY_PATH, "r", encoding="utf-8") as f:
-        CUSTOM_LOCATIONS = json.load(f)
-    log(f"📘 Loaded {len(CUSTOM_LOCATIONS)} dictionary entries from dictionary.json")
-except Exception:
-    CUSTOM_LOCATIONS = {}
-
-
-# ---------------------------
-# Regex and prompts
-# ---------------------------
-PLACE_REGEX = re.compile(r"\b(?:in|at|near|from)\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*)")
-DATELINE_REGEX = re.compile(r"^\s*([A-Z][A-Z]+|[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)(?:\s*—|,)")
-
-AI_CLASSIFY_PROMPT = (
-    "You are a geopolitical news classifier. "
-    "Given a short news title and description, decide:\n"
-    "1. show: true or false — should it appear on a global events map?\n"
-    "2. topic: one of [geopolitics, finance, tech, disaster, social, science, other]\n"
-    "3. importance: 1–5 (1=local/state level, 5=major global)\n\n"
-    "Be lenient when classifying importance 5: anything that affects world business, geopolitics, "
-    "technology, or global affairs in a significant way counts as 5. "
-    "Events with moderate international relevance are 4. "
-    "Regional or provincial issues are 2–3. "
-    "Local/state-only stories are 1.\n\n"
-    "Always include world affairs, diplomacy, leaders, government policies, wars, military, economy, "
-    "trade, security, or international relations. "
-    "Be inclusive for any story about governments, politics, military, diplomacy, leaders, or global economics. "
-    "Do NOT exclude stories mentioning political figures (e.g., Trump, Xi, Putin). "
-    "Exclude only entertainment, celebrity gossip, lifestyle, fashion, sports, or recipes.\n\n"
-    "Return ONLY this exact format (lowercase):\n"
-    "show=<true|false>; topic=<topic>; importance=<1-5>"
-)
-
-AI_LOCATION_PROMPT = (
-    "Given a news title and description, output one specific city or country most directly involved. "
-    "Return ONLY the name, e.g., 'Beijing, China' or 'Washington, D.C., USA'. "
-    "If unsure, return the most likely capital city related to the context."
-)
-
-
-# ---------------------------
-# Geocoders
+# Initialize geocoders
 # ---------------------------
 try:
     geolocator_nom = Nominatim(user_agent="geomonitor_news_app")
@@ -135,7 +84,9 @@ try:
 except Exception as e:
     raise SystemExit(f"❌ Geocoder init failed: {e}")
 
-
+# ---------------------------
+# Helpers
+# ---------------------------
 def persist_caches():
     try:
         with open(GEOCACHE_PATH, "w", encoding="utf-8") as f:
@@ -145,9 +96,38 @@ def persist_caches():
     except Exception:
         pass
 
+# ---------------------------
+# AI Prompts
+# ---------------------------
+AI_CLASSIFY_PROMPT = (
+    "You are a geopolitical news classifier. "
+    "Given a short news title and description, decide:\n"
+    "1. show: true or false — should it appear on a global events map?\n"
+    "2. topic: one of [geopolitics, finance, tech, disaster, social, science, other]\n"
+    "3. importance: 1–5 (1=regional/state level, 5=major global impact)\n\n"
+    "Be lenient assigning importance:\n"
+    "- Level 5: anything that significantly affects international relations, global markets, or security.\n"
+    "- Level 4: events that slightly affect world affairs but are not dominant headlines.\n"
+    "- Level 3: national-level news.\n"
+    "- Level 2: provincial or city-level.\n"
+    "- Level 1: purely local or internal community.\n\n"
+    "Always include world affairs, diplomacy, leaders, government policies, wars, military, economy, "
+    "trade, security, or international relations. "
+    "Be inclusive for any story about governments, politics, military, diplomacy, leaders, or global economics. "
+    "Do NOT exclude stories mentioning political figures (e.g., Trump, Xi, Putin). "
+    "Exclude only entertainment, celebrity gossip, lifestyle, fashion, sports, or recipes.\n\n"
+    "Return ONLY this exact format (lowercase):\n"
+    "show=<true|false>; topic=<topic>; importance=<1-5>"
+)
+
+AI_LOCATION_PROMPT = (
+    "Given a news title and description, output one specific city or country most directly involved. "
+    "Return ONLY the name, e.g., 'Beijing, China' or 'Washington, D.C., USA' or 'Moscow, Russia'. "
+    "If unsure, return the most likely capital city related to the context."
+)
 
 # ---------------------------
-# AI classification
+# AI Classify
 # ---------------------------
 def ai_classify_article(article):
     if not AI_IS_ON or not AI_CLASSIFY_ON or not OPENROUTER_KEY:
@@ -176,7 +156,7 @@ def ai_classify_article(article):
             "https://openrouter.ai/api/v1/chat/completions",
             headers={"Authorization": f"Bearer {OPENROUTER_KEY}", "Content-Type": "application/json"},
             json=payload,
-            timeout=25,
+            timeout=20,
         )
         r.raise_for_status()
         raw = r.json()["choices"][0]["message"]["content"].lower().strip()
@@ -198,14 +178,12 @@ def ai_classify_article(article):
         log(f"⚠️ AI classify failed: {e}")
         return True, "other", 2
 
-
 # ---------------------------
-# AI location
+# AI Location
 # ---------------------------
 def ai_guess_location(article):
     if not AI_IS_ON or not AI_LOCATION_FALLBACK_ON or not OPENROUTER_KEY:
         return None
-
     title = article.get("title", "")
     desc = article.get("description", "")
     prompt_text = f"Title: {title}\nDescription: {desc}\n\n{AI_LOCATION_PROMPT}"
@@ -237,9 +215,8 @@ def ai_guess_location(article):
         log(f"⚠️ AI location guess failed: {e}")
         return None
 
-
 # ---------------------------
-# Geocoding
+# Geocode
 # ---------------------------
 def geocode_location(name):
     if not name:
@@ -249,17 +226,17 @@ def geocode_location(name):
         g = GEOCACHE[key]
         return g["lat"], g["lon"]
 
-    time.sleep(1)
+    time.sleep(1.2)
     try:
         loc = geolocator_nom.geocode(name, timeout=10)
         if loc:
             lat, lon = float(loc.latitude), float(loc.longitude)
             GEOCACHE[key] = {"lat": lat, "lon": lon}
             persist_caches()
+            log(f"🗺️ Nominatim → {name} → ({lat:.4f}, {lon:.4f})")
             return lat, lon
-    except Exception as e:
-        log(f"⚠️ Nominatim geocode failed for {name}: {e}")
-
+    except Exception:
+        pass
     if geolocator_geo:
         try:
             loc = geolocator_geo.geocode(name, timeout=10)
@@ -267,21 +244,18 @@ def geocode_location(name):
                 lat, lon = float(loc.latitude), float(loc.longitude)
                 GEOCACHE[key] = {"lat": lat, "lon": lon}
                 persist_caches()
+                log(f"🌐 Geoapify → {name} → ({lat:.4f}, {lon:.4f})")
                 return lat, lon
-        except Exception as e:
-            log(f"⚠️ Geoapify geocode failed for {name}: {e}")
-
+        except Exception:
+            pass
     return None, None
 
-
 # ---------------------------
-# Fetch and process News
+# Fetch News
 # ---------------------------
-def fetch_and_process():
+def fetch_news():
     TOPICS = [
-        "geopolitics",
-        "international relations",
-        "war OR conflict",
+        "geopolitics", "international relations", "war OR conflict",
         "finance OR stock market OR economic crisis",
         "technology OR AI OR semiconductor OR cyber attack",
         "natural disaster OR earthquake OR hurricane",
@@ -293,8 +267,7 @@ def fetch_and_process():
     try:
         r = requests.get(url, timeout=20)
         r.raise_for_status()
-        data = r.json()
-        arts = data.get("articles", [])
+        arts = r.json().get("articles", [])
         log(f"Fetched {len(arts)} raw articles.")
     except Exception as e:
         log(f"❌ News fetch failed: {e}")
@@ -315,15 +288,7 @@ def fetch_and_process():
         if not show:
             continue
 
-        loc_hint = None
-        src = (a.get("source") or {}).get("name", "").lower()
-        if src in CUSTOM_LOCATIONS:
-            loc_hint = CUSTOM_LOCATIONS[src]
-
-        if not loc_hint:
-            guess = ai_guess_location(a)
-            if guess:
-                loc_hint = guess
+        loc_hint = ai_guess_location(a)
         if not loc_hint:
             continue
 
@@ -345,50 +310,58 @@ def fetch_and_process():
         }
     return events
 
-
 # ---------------------------
-# Hurricanes (GDACS)
+# Fetch Hurricanes (GDACS)
 # ---------------------------
-def fetch_hurricanes_from_gdacs():
+def fetch_gdacs_hurricanes():
     url = "https://www.gdacs.org/xml/rss.xml"
+    events = {}
     try:
-        r = requests.get(url, timeout=15)
+        r = requests.get(url, timeout=20, headers={"User-Agent": "GeomonitorBot/1.0"})
         r.raise_for_status()
-        root = ET.fromstring(r.text)
-        events = {}
+        content = r.content.strip()
+        if not content.startswith(b"<?xml"):
+            log("⚠️ GDACS feed is not XML (HTML or error returned).")
+            return {}
+
+        root = ET.fromstring(content)
         for item in root.findall(".//item"):
-            title = item.findtext("title") or ""
-            if "tropical cyclone" not in title.lower():
-                continue
-            link = item.findtext("link") or ""
-            lat = item.findtext("{http://www.gdacs.org}lat")
-            lon = item.findtext("{http://www.gdacs.org}lon")
+            title = item.findtext("title") or "Unnamed Event"
+            link = item.findtext("link")
             desc = item.findtext("description") or ""
-            if not lat or not lon:
+            if not any(k in title.lower() for k in ["tropical", "cyclone", "hurricane", "typhoon"]):
                 continue
-            events[f"hurricane_{hash(title)}"] = {
-                "name": title,
-                "url": link,
+
+            lat_tag = item.find("{http://www.gdacs.org}latitude")
+            lon_tag = item.find("{http://www.gdacs.org}longitude")
+            if not lat_tag or not lon_tag:
+                continue
+
+            lat, lon = float(lat_tag.text), float(lon_tag.text)
+            key = f"hurricane_{hash(title) % 10**8}"
+            events[key] = {
+                "title": title,
                 "description": desc,
-                "lat": float(lat),
-                "lon": float(lon),
-                "updated": datetime.utcnow().isoformat(),
-                "wind_speed": "N/A",
+                "url": link,
+                "lat": lat,
+                "lon": lon,
+                "timestamp": datetime.utcnow().isoformat(),
+                "topic": "disaster",
+                "importance": 5,
+                "type": "Hurricane",
             }
-        log(f"🌀 Found {len(events)} hurricanes from GDACS")
-        return events
+
+        log(f"🌀 Parsed {len(events)} GDACS hurricanes.")
     except Exception as e:
         log(f"⚠️ GDACS fetch failed: {e}")
-        return {}
-
+    return events
 
 # ---------------------------
-# Firebase push
+# Push to Firebase
 # ---------------------------
 def push_batch_events(events):
     fb_url = f"{FIREBASE_URL}/events.json"
     cutoff = datetime.utcnow() - timedelta(days=2)
-
     try:
         old = requests.get(fb_url, timeout=10).json() or {}
         log(f"Fetched {len(old)} old events.")
@@ -415,30 +388,16 @@ def push_batch_events(events):
     except Exception as e:
         log(f"❌ PUSH FAILED: {e}")
 
-
-def push_batch_events_to_node(events, node_name):
-    fb_url = f"{FIREBASE_URL}/{node_name}.json"
-    try:
-        r = requests.put(fb_url, data=json.dumps(events), timeout=15)
-        r.raise_for_status()
-        log(f"✅ PUSH COMPLETE: {len(events)} items to /{node_name}")
-    except Exception as e:
-        log(f"❌ PUSH FAILED to /{node_name}: {e}")
-
-
 # ---------------------------
 # Main
 # ---------------------------
 if __name__ == "__main__":
     log("=== Starting Data Injection Job ===")
-    ev = fetch_and_process()
-    if ev:
-        push_batch_events(ev)
+    events = fetch_news()
+    hurricanes = fetch_gdacs_hurricanes()
+    events.update(hurricanes)
+    if events:
+        push_batch_events(events)
     else:
         log("No new events to push.")
-
-    hurricanes = fetch_hurricanes_from_gdacs()
-    if hurricanes:
-        push_batch_events_to_node(hurricanes, "hurricanes")
-
     log("=== Job Complete ===")
