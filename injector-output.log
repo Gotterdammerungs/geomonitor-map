@@ -1,142 +1,102 @@
-[10:48:48] Booting Geomonitor Data Injector...
-[10:48:48] Firebase URL: https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app
-[10:48:48] NewsAPI key: ✅ Present
-[10:48:48] Geoapify key: ✅ Present
-[10:48:48] OpenRouter key: ✅ Present
-[10:48:48] 📘 Loaded 1275 dictionary entries from dictionary.json
-[10:48:48] ✅ Initialized Nominatim geocoder (Geoapify unavailable).
-[10:48:48] === Starting Data Injection Job ===
-[10:48:48] Fetching news: https://newsapi.org/v2/everything?q=geopolitics%20OR%20international%20relations%20OR%20war%20OR%20conflict%20OR%20finance%20OR%20stock%20market%20OR%20economic%20crisis%20OR%20technology%20OR%20AI%20OR%20semiconductor%20OR%20cyber%20attack%20OR%20natural%20disaster%20OR%20earthquake%20OR%20hurricane&language=en&sortBy=publishedAt&pageSize=30&apiKey=7f0c06cb96494e1ca7e86eace438fd29
-[10:48:48] Fetched 29 raw articles.
-[10:48:48] Filtered down to 26 articles.
-[10:48:48] 
+[10:50:11] Booting Geomonitor Data Injector...
+[10:50:11] Firebase URL: https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app
+[10:50:11] NewsAPI key: ✅ Present
+[10:50:11] Geoapify key: ✅ Present
+[10:50:11] OpenRouter key: ✅ Present
+[10:50:11] 📘 Loaded 1275 dictionary entries from dictionary.json
+[10:50:12] ✅ Initialized Nominatim geocoder (Geoapify unavailable).
+[10:50:12] === Starting Data Injection Job ===
+[10:50:12] Fetching news: https://newsapi.org/v2/everything?q=geopolitics%20OR%20international%20relations%20OR%20war%20OR%20conflict%20OR%20finance%20OR%20stock%20market%20OR%20economic%20crisis%20OR%20technology%20OR%20AI%20OR%20semiconductor%20OR%20cyber%20attack%20OR%20natural%20disaster%20OR%20earthquake%20OR%20hurricane&language=en&sortBy=publishedAt&pageSize=30&apiKey=7f0c06cb96494e1ca7e86eace438fd29
+[10:50:12] Fetched 29 raw articles.
+[10:50:12] Filtered down to 26 articles.
+[10:50:12] 
 [1/26] Give up 'failed path' of armed struggle, join mainstream: Surrendered Naxal Bhupathi to comrades
-[10:48:49] 🧠 AI classify → show=true
-topic=geopolitics
-importance=3
-[10:48:49] → show=True, topic=geopolitics, importance=3
-[10:48:49] 🧠 AI location guess → Gadchiroli, India
-[10:48:51] 
+[10:50:12] → show=True, topic=geopolitics, importance=3
+[10:50:12] 🧠 AI location guess → Gadchiroli, India
+[10:50:12] 
 [2/26] Woman Aghast as 14 Data Centers Move Next Door, Emits Terrible Stench
-[10:48:51] 🧠 AI classify → 
-[10:48:51] → show=False, topic=other, importance=2
-[10:48:51] 
+[10:50:12] → show=False, topic=other, importance=2
+[10:50:12] 
 [3/26] Overton Window Speedrun: British Voters Now More Right-Wing on Immigration Than Americans
-[10:48:53] 🧠 AI classify → show=true; topic=geopolitics; importance=4 out
-[10:48:53] → show=True, topic=geopolitics, importance=4
-[10:48:53] 🧠 AI location guess → <s> [OUT] United Kingdom
-[10:48:55] 
+[10:50:12] → show=True, topic=geopolitics, importance=4
+[10:50:12] 🧠 AI location guess → United Kingdom (specifically, the country as a whole, not a specific city)
+[10:50:14] 
 [4/26] Nvidia emerges as TSMC's first A16 customer, while Apple may skip to A14
-[10:48:55] 🧠 AI classify → 
-[10:48:55] → show=False, topic=other, importance=2
-[10:48:55] 
+[10:50:14] → show=False, topic=other, importance=2
+[10:50:14] 
 [5/26] US urges ASEAN to be firm in countering China in the South China Sea
-[10:48:56] 🧠 AI classify → show=true
-topic=geopolitics
-importance=5
-[10:48:56] → show=True, topic=geopolitics, importance=5
-[10:48:56] 🧠 AI location guess → <s> [OUT] China
-[10:48:58] 
+[10:50:14] → show=True, topic=geopolitics, importance=5
+[10:50:14] 🧠 AI location guess → Beijing, China (for China) and Washington, D.C., USA (for the United States
+[10:50:16] 
 [6/26] I'm the CEO behind the New York Marathon. Here's how we pull off the world's biggest race.
-[10:48:59] 🧠 AI classify → show=false; topic=other; importance=1
-[10:48:59] → show=False, topic=other, importance=1
-[10:48:59] 
+[10:50:16] → show=False, topic=other, importance=1
+[10:50:16] 
 [7/26] Asean reaffirms 'no nukes' stance, says Defence Minister
-[10:48:59] 🧠 AI classify → show=true
-topic=geopolitics
-importance=4
-[10:48:59] → show=True, topic=geopolitics, importance=4
-[10:49:00] 🧠 AI location guess → KUALA LUMPUR
-[10:49:01] 
+[10:50:16] → show=True, topic=geopolitics, importance=4
+[10:50:17] 🧠 AI location guess → KUALA LUMPUR
+[10:50:17] 
 [8/26] Housing market inventory shift: 17 states where buyers are winning back power
-[10:49:02] 🧠 AI classify → show=false; topic=other; importance=1
-[10:49:02] → show=False, topic=other, importance=1
-[10:49:02] 
+[10:50:17] → show=False, topic=other, importance=1
+[10:50:17] 
 [9/26] BYD's October vehicle sales down 12% from year earlier
-[10:49:02] 🧠 AI classify → show=true
-topic=tech
-importance=2
-[10:49:02] → show=True, topic=tech, importance=2
-[10:49:03] 🧠 AI location guess → <s> [OUT] China
-[10:49:03] 
+[10:50:17] → show=True, topic=tech, importance=2
+[10:50:17] 🧠 AI location guess → <s> [OUT] China
+[10:50:17] 
 [10/26] IonQ: Quantum Progress Meets Market Reality
-[10:49:03] 🧠 AI classify → show=false; topic=tech; importance=3
-[10:49:03] → show=False, topic=tech, importance=3
-[10:49:03] 
+[10:50:17] → show=False, topic=tech, importance=3
+[10:50:17] 
 [11/26] Jamaican town reduced to rubble by Hurricane Melissa
-[10:49:05] 🧠 AI classify → 
-[10:49:05] → show=False, topic=other, importance=2
-[10:49:05] 
+[10:50:17] → show=False, topic=other, importance=2
+[10:50:17] 
 [12/26] Taiwan’s quantum talent gap widens as Dutch model highlights what’s missing
-[10:49:06] 🧠 AI classify → show=true; topic=tech; importance=4
-[10:49:06] → show=True, topic=tech, importance=4
-[10:49:07] 🧠 AI location guess → <s> [OUT] Taiwan
-[10:49:08] 
+[10:50:17] → show=True, topic=tech, importance=4
+[10:50:18] 🧠 AI location guess → <s> [OUT] Taiwan
+[10:50:18] 
 [13/26] BYD's October vehicle sales down 12% from year earlier
-[10:49:08] 🧠 AI classify → 
-[10:49:08] → show=False, topic=other, importance=2
-[10:49:08] 
+[10:50:18] → show=False, topic=other, importance=2
+[10:50:18] 
 [14/26] This Simple Habit Can Improve Focus & Concentration, Study Finds
-[10:49:09] 🧠 AI classify → show=false; topic=social; importance=1
-[10:49:09] → show=False, topic=social, importance=1
-[10:49:09] 
+[10:50:18] → show=False, topic=social, importance=1
+[10:50:18] 
 [15/26] China signals easing of Nexperia chip export ban after talks with US, EU
-[10:49:09] 🧠 AI classify → 
-[10:49:09] → show=False, topic=other, importance=2
-[10:49:09] 
+[10:50:18] → show=False, topic=other, importance=2
+[10:50:18] 
 [16/26] Foreign Secretary speech at the 21st Manama Dialogue Conference in Bahrain
-[10:49:10] 🧠 AI classify → show=true; topic=geopolitics; importance=4 s
-[10:49:10] → show=True, topic=geopolitics, importance=4
-[10:49:10] 🧠 AI location guess → Manama, Bahrain
-[10:49:11] 
+[10:50:18] → show=True, topic=geopolitics, importance=4
+[10:50:19] 🧠 AI location guess → Manama, Bahrain
+[10:50:19] 
 [17/26] Taiwan analytics firm wins Canadian telecom deal, marking North American debut
-[10:49:11] 🧠 AI classify → 
-[10:49:11] → show=False, topic=other, importance=2
-[10:49:11] 
+[10:50:19] → show=False, topic=other, importance=2
+[10:50:19] 
 [18/26] Dalal Street Week Ahead: Technical charts signal bullish bias despite mild fatigue
-[10:49:12] 🧠 AI classify → show=false
-topic=finance
-importance=2
-[10:49:12] → show=False, topic=finance, importance=2
-[10:49:12] 
+[10:50:19] → show=False, topic=finance, importance=2
+[10:50:19] 
 [19/26] National Library prepares materials on nutrition to support MBG
-[10:49:12] 🧠 AI classify → show=false; topic=other; importance=1 s
-[10:49:12] → show=False, topic=other, importance=1
-[10:49:12] 
+[10:50:19] → show=False, topic=other, importance=1
+[10:50:19] 
 [20/26] Linux 6.18 Kernel Happenings, Python 3.14, NTFSPLUS & Other October Highlights
-[10:49:13] 🧠 AI classify → 
-[10:49:13] → show=False, topic=other, importance=2
-[10:49:13] 
+[10:50:19] → show=False, topic=other, importance=2
+[10:50:19] 
 [21/26] F&O Talk| Nifty logs 11 sessions of tight moves post 1,500-point rally. Here are the key levels Sudeep Shah is eyeing
-[10:49:13] 🧠 AI classify → 
-[10:49:13] → show=False, topic=other, importance=2
-[10:49:13] 
+[10:50:19] → show=False, topic=other, importance=2
+[10:50:19] 
 [22/26] NES Friday the 13th and NECA in The Daily LITG, 1st November, 2025
-[10:49:13] 🧠 AI classify → 
-[10:49:13] → show=False, topic=other, importance=2
-[10:49:13] 
+[10:50:19] → show=False, topic=other, importance=2
+[10:50:19] 
 [23/26] orq-ai-sdk 3.14.7
-[10:49:14] 🧠 AI classify → show=false; topic=tech; importance=1
-[10:49:14] → show=False, topic=tech, importance=1
-[10:49:14] 
+[10:50:19] → show=False, topic=tech, importance=1
+[10:50:19] 
 [24/26] Inflation Rises in Turkey’s Biggest City Ahead of National Data
-[10:49:16] 🧠 AI classify → inflation in turkeys largest city istanbul has surged to 120.29 in may according to the istanbul chamber of commerce. this comes ahead of the national inflation data release which is expected to show a significant
-[10:49:16] → show=False, topic=other, importance=2
-[10:49:16] 
+[10:50:19] → show=False, topic=other, importance=2
+[10:50:19] 
 [25/26] China's Xi pushes for global AI body at APEC in counter to U.S. - CNBC
-[10:49:16] 🧠 AI classify → show=true
-topic=geopolitics
-importance=5
-[10:49:16] → show=True, topic=geopolitics, importance=5
-[10:49:17] 🧠 AI location guess → <s> [OUT] China
-[10:49:17] 
+[10:50:19] → show=True, topic=geopolitics, importance=5
+[10:50:19] 🧠 AI location guess → <s> [OUT] China
+[10:50:19] 
 [26/26] On the island of Belene, Bulgarian communism’s forgotten prison
-[10:49:17] 🧠 AI classify → show=true
-topic=social
-importance=2
-[10:49:17] → show=True, topic=social, importance=2
-[10:49:18] 🧠 AI location guess → Bulgaria
-[10:49:20] Fetched 159 old events.
-[10:49:20] ✅ PUSH COMPLETE: 168 total events.
-[10:49:22] ⚠️ GDACS fetch failed: not well-formed (invalid token): line 1, column 1
-[10:49:22] === Job Complete ===
+[10:50:19] → show=True, topic=social, importance=2
+[10:50:20] 🧠 AI location guess → Bulgaria
+[10:50:21] Fetched 168 old events.
+[10:50:21] ✅ PUSH COMPLETE: 175 total events.
+[10:50:22] ⚠️ GDACS fetch failed: not well-formed (invalid token): line 1, column 1
+[10:50:22] === Job Complete ===
