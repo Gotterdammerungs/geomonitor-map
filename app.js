@@ -2,23 +2,21 @@
 // Geomonitor Map Frontend
 // ===============================
 
-// Global variables
 let activeMarkers = {};
 let map;
-let hurricaneLayer = L.layerGroup();
 let crtOverlay = document.createElement("div");
 crtOverlay.classList.add("crt-scanlines", "crt-flicker", "crt-colorsep");
 document.body.appendChild(crtOverlay);
 
-// Initialize Firebase (must match your project)
+// Initialize Firebase (MUST come before database usage)
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
+  apiKey: "YOUR_FIREBASE_API_KEY",
   authDomain: "geomonitor-2025.firebaseapp.com",
   databaseURL: "https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "geomonitor-2025",
   storageBucket: "geomonitor-2025.appspot.com",
   messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  appId: "YOUR_APP_ID",
 };
 firebase.initializeApp(firebaseConfig);
 
@@ -75,7 +73,7 @@ function getTopicColor(topic) {
 }
 
 // ===============================
-// 3. Visibility by importance
+// 3. Zoom threshold by importance
 // ===============================
 function getMinZoomForImportance(importance) {
   switch (parseInt(importance)) {
@@ -89,7 +87,7 @@ function getMinZoomForImportance(importance) {
 }
 
 // ===============================
-// 4. Firebase Realtime Listener
+// 4. Firebase listener
 // ===============================
 function setupRealtimeListener() {
   const dbRef = firebase.database().ref("/events");
@@ -97,7 +95,7 @@ function setupRealtimeListener() {
   dbRef.on("value", (snapshot) => {
     const events = snapshot.val();
     if (!events) {
-      console.log("⚠️ No events found.");
+      console.log("⚠️ No events found in database.");
       return;
     }
 
@@ -151,7 +149,7 @@ function setupRealtimeListener() {
 }
 
 // ===============================
-// 5. Update Marker Visibility
+// 5. Marker visibility
 // ===============================
 function updateMarkerVisibility() {
   const zoom = map.getZoom();
@@ -165,7 +163,7 @@ function updateMarkerVisibility() {
 }
 
 // ===============================
-// 6. Controls UI (bottom right)
+// 6. UI Controls
 // ===============================
 const controlPanel = document.createElement("div");
 controlPanel.className = "control-panel";
@@ -178,9 +176,6 @@ controlPanel.innerHTML = `
 `;
 document.body.appendChild(controlPanel);
 
-// ===============================
-// 7. UI Events
-// ===============================
 document.getElementById("toggle-dark").addEventListener("change", (e) => {
   if (e.target.checked) {
     map.removeLayer(tileLayers.light);
@@ -204,8 +199,7 @@ document.getElementById("toggle-hurricanes").addEventListener("change", (e) => {
 });
 
 document.getElementById("crt-intensity").addEventListener("input", (e) => {
-  const v = e.target.value;
-  crtOverlay.style.opacity = v;
+  crtOverlay.style.opacity = e.target.value;
 });
 
 // ===============================
