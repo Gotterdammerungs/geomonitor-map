@@ -1,93 +1,154 @@
-[11:05:09] Booting Geomonitor Data Injector...
-[11:05:09] Firebase URL: https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app
-[11:05:09] NewsAPI key: ✅ Present
-[11:05:09] Geoapify key: ✅ Present
-[11:05:09] OpenRouter key: ✅ Present
-[11:05:09] ✅ Initialized Nominatim geocoder (Geoapify unavailable).
-[11:05:09] === Starting Data Injection Job ===
-[11:05:09] Fetching news: https://newsapi.org/v2/everything?q=geopolitics%20OR%20international%20relations%20OR%20war%20OR%20conflict%20OR%20finance%20OR%20stock%20market%20OR%20economic%20crisis%20OR%20technology%20OR%20AI%20OR%20semiconductor%20OR%20cyber%20attack%20OR%20natural%20disaster%20OR%20earthquake%20OR%20hurricane&language=en&sortBy=publishedAt&pageSize=30&apiKey=7f0c06cb96494e1ca7e86eace438fd29
-[11:05:09] Fetched 27 raw articles.
-[11:05:09] Filtered down to 26 articles.
-[11:05:09] 
-[1/26] Ognissanti, in Spagna la visita ai cari defunti
-[11:05:09] → show=False, topic=social, importance=1
-[11:05:09] 
-[2/26] Urban Company revenues jump 37% even as it posts losses
-[11:05:09] → show=False, topic=other, importance=2
-[11:05:09] 
-[3/26] 8 ways to help your teams build lasting responsible AI
-[11:05:09] → show=False, topic=tech, importance=3
-[11:05:09] 
-[4/26] Dogecoin Enters The Big Leagues — Stadium And Jerseys Get A Crypto Makeover
-[11:05:09] → show=False, topic=other, importance=2
-[11:05:09] 
-[5/26] Louis Têtu: Why Canada has to get artificial intelligence right
-[11:05:09] → show=False, topic=other, importance=2
-[11:05:09] 
-[6/26] ChatGPT Atlas AI Browser : The Future of Surfing the Web
-[11:05:09] → show=False, topic=tech, importance=3
-[11:05:09] 
-[7/26] A doctor’s fight to repair, not replace
-[11:05:09] → show=False, topic=science, importance=3
-[11:05:09] 
-[8/26] Nvidia's dizzying week of dealmaking
-[11:05:09] → show=True, topic=tech, importance=4
-[11:05:10] 🧠 AI location guess → <s> [OUT] Santa Clara, USA
-[11:05:10] 
-[9/26] My Hero Academia's Successor Is Already Here: Meet To Be Hero X
-[11:05:10] → show=False, topic=other, importance=1
-[11:05:10] 
-[10/26] This open-source bookmarks sync tool just freed me from Google Chrome
-[11:05:10] → show=False, topic=tech, importance=1
-[11:05:10] 
-[11/26] 27 Shoes For Anyone Who Wants Comfy Feet But Doesn’t Want Sneakers
-[11:05:10] → show=False, topic=other, importance=2
-[11:05:10] 
-[12/26] 'Mankeeping' Might Explain Why More Straight Women Are Staying Single
-[11:05:10] → show=False, topic=social, importance=1
-[11:05:10] 
-[13/26] Too Cold Or Dark Outside To Walk? Try This Instead.
-[11:05:10] → show=False, topic=other, importance=1
-[11:05:10] 
-[14/26] 'Orthosomnia' Might Be Ruining Your Sleep. Here's What You Should Know.
-[11:05:10] → show=False, topic=other, importance=1
-[11:05:10] 
-[15/26] These People ‘Convinced’ Their Partner To Have Kids. Here's How That Worked Out For Them.
-[11:05:10] → show=False, topic=social, importance=1
-[11:05:10] 
-[16/26] Taiwan solar maker pushes storm-proof technology and niche strategy in U.S. and Japan markets
-[11:05:10] → show=False, topic=other, importance=2
-[11:05:10] 
-[17/26] Verizon is in crisis: Here’s what its new CEO must do to turn things around
-[11:05:10] → show=False, topic=other, importance=2
-[11:05:10] 
-[18/26] Warning to rest of NFL: Davante Adams-Matthew Stafford attack heating up for Rams
-[11:05:10] → show=False, topic=other, importance=1
-[11:05:10] 
-[19/26] The Slow Death of Special Education
-[11:05:10] → show=False, topic=social, importance=3
-[11:05:10] 
-[20/26] Self-Forgetfulness: George Kinder’s Key To Finding—And Being—A True Fiduciary
-[11:05:10] → show=False, topic=finance, importance=2
-[11:05:10] 
-[21/26] Your Moral Code Has Christian Roots Whether You Know It or Not
-[11:05:10] → show=False, topic=social, importance=1
-[11:05:10] 
-[22/26] Two Apple devices you really shouldn't buy this month (and 9 that are safe for now)
-[11:05:10] → show=False, topic=tech, importance=2
-[11:05:10] 
-[23/26] Mutuum Finance (MUTM) Completes Roadmap Phase 1 as V1 Protocol Launch Nears
-[11:05:10] → show=False, topic=other, importance=2
-[11:05:10] 
-[24/26] How Childhood Relationships Affect Your Adult Attachment Style, according to Large New Study
-[11:05:10] → show=False, topic=social, importance=1
-[11:05:10] 
-[25/26] Penn State vs. Ohio State prediction: Odds, picks, best bet for Big Ten clash
-[11:05:10] → show=False, topic=other, importance=1
-[11:05:10] 
-[26/26] The ‘10 Martini’ Proof Connects Quantum Mechanics With Infinitely Intricate Mathematical Structures
-[11:05:10] → show=False, topic=science, importance=1
-[11:05:11] ⚠️ GDACS feed is not XML (HTML or error returned).
-[11:05:12] Fetched 188 old events.
-[11:05:13] ✅ PUSH COMPLETE: 189 total events.
-[11:05:13] === Job Complete ===
+[11:12:45] Booting Geomonitor Data Injector...
+[11:12:45] Firebase URL: https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app
+[11:12:45] NewsAPI key: ✅ Present
+[11:12:45] Geoapify key: ✅ Present
+[11:12:45] OpenRouter key: ✅ Present
+[11:12:45] ✅ Initialized Nominatim geocoder (Geoapify unavailable).
+[11:12:45] === Starting Data Injection Job ===
+[11:12:45] Fetching news: https://newsapi.org/v2/everything?q=geopolitics%20OR%20international%20relations%20OR%20war%20OR%20conflict%20OR%20finance%20OR%20stock%20market%20OR%20economic%20crisis%20OR%20technology%20OR%20AI%20OR%20semiconductor%20OR%20cyber%20attack%20OR%20natural%20disaster%20OR%20earthquake%20OR%20hurricane&language=en&sortBy=publishedAt&pageSize=30&apiKey=7f0c06cb96494e1ca7e86eace438fd29
+[11:12:46] Fetched 28 raw articles.
+[11:12:46] Filtered down to 27 articles.
+[11:12:46] 
+[1/27] Meet Gen. Kenneth Wilsbach, the new US Air Force Chief of Staff: Massive challenges await him as he takes charge; a look at his career and challenges ahead
+[11:12:47] 🧠 AI classify → 
+[11:12:47] → show=False, topic=other, importance=2
+[11:12:47] 
+[2/27] YouTube CEO emphasizes AI as the next technological frontier
+[11:12:48] 🧠 AI classify → show=false; topic=tech; importance=3 s
+[11:12:48] → show=False, topic=tech, importance=3
+[11:12:48] 
+[3/27] Ukraine Claims Successful Strike on Moscow Pipeline That Supplies Russian Forces
+[11:12:48] 🧠 AI classify → show=true
+topic=geopolitics
+importance=5
+[11:12:48] → show=True, topic=geopolitics, importance=5
+[11:12:49] 🧠 AI location guess → Moscow, Russia
+[11:12:50] 🗺️ Nominatim → Moscow, Russia → (55.6256, 37.6064)
+[11:12:50] 
+[4/27] Istanbul Airport has sleep pods, therapy dogs, and the world's biggest terminal. Its CEO explains how it went from zero to the world's best in 5 years.
+[11:12:51] 🧠 AI classify → 
+[11:12:51] → show=False, topic=other, importance=2
+[11:12:51] 
+[5/27] AR glasses blur the lines of when it’s obvious a company is collecting your data, privacy expert says
+[11:12:51] 🧠 AI classify → show=true
+topic=tech
+importance=4
+[11:12:51] → show=True, topic=tech, importance=4
+[11:12:52] 🧠 AI location guess → <s> [OUT] USA
+[11:12:52] 
+[6/27] Parents are reverting to landline phones to stop their kids becoming smartphone addicts
+[11:12:52] 🧠 AI classify → show=false; topic=social; importance=1
+[11:12:52] → show=False, topic=social, importance=1
+[11:12:52] 
+[7/27] Israel: Returned Remains of 3 Aren't Hostages
+[11:12:53] 🧠 AI classify → 
+[11:12:53] → show=False, topic=other, importance=2
+[11:12:53] 
+[8/27] Siemens turns to software to manage AI’s power surge
+[11:12:53] 🧠 AI classify → 
+[11:12:53] → show=False, topic=other, importance=2
+[11:12:53] 
+[9/27] Microsoft Confirms Free Windows 10 Security Updates — How To Get Them
+[11:12:53] 🧠 AI classify → 
+[11:12:53] → show=False, topic=other, importance=2
+[11:12:53] 
+[10/27] Jensen Huang's Seoul dinner with Samsung, Hyundai chiefs sparks 'AI Korea' speculation
+[11:12:54] 🧠 AI classify → show=true
+topic=tech
+importance=4
+[11:12:54] → show=True, topic=tech, importance=4
+[11:12:55] 🧠 AI location guess → Seoul, South Korea
+[11:12:56] 🗺️ Nominatim → Seoul, South Korea → (37.5667, 126.9783)
+[11:12:56] 
+[11/27] The World Must Demand the Release of Palestinian Leader Marwan Barghouti
+[11:12:57] 🧠 AI classify → 
+[11:12:57] → show=False, topic=other, importance=2
+[11:12:57] 
+[12/27] How an 'accidental banker' is turning this LA-based investment bank into one of the biggest deal machines
+[11:12:58] 🧠 AI classify → show=false; topic=finance; importance=3 s
+[11:12:58] → show=False, topic=finance, importance=3
+[11:12:58] 
+[13/27] What to Do in Portland, Oregon If You're Here for Business (2025)
+[11:12:59] 🧠 AI classify → show=false; topic=other; importance=1 s
+[11:12:59] → show=False, topic=other, importance=1
+[11:12:59] 
+[14/27] MLTX INVESTOR REMINDER: MoonLake Immunotherapeutics Investors may have been Affected by Fraud -- Contact BFA Law if You Suffered Losses
+[11:13:00] 🧠 AI classify → 
+[11:13:00] → show=False, topic=other, importance=2
+[11:13:00] 
+[15/27] Taiwan researchers develop tool to block harmful GenAI content
+[11:13:01] 🧠 AI classify → 
+[11:13:01] → show=False, topic=other, importance=2
+[11:13:01] 
+[16/27] Leftward lurch: Second socialist leader ready to rule another iconic American city
+[11:13:01] 🧠 AI classify → show=true
+topic=social
+importance=4
+[11:13:01] → show=True, topic=social, importance=4
+[11:13:02] 🧠 AI location guess → Seattle, USA
+[11:13:03] 🗺️ Nominatim → Seattle, USA → (47.6038, -122.3301)
+[11:13:03] 
+[17/27] JHX INVESTOR REMINDER: James Hardie Industries plc Investors may have been Affected by Fraud -- Contact BFA Law if You Suffered Losses
+[11:13:04] 🧠 AI classify → show=false; topic=finance; importance=4
+[11:13:04] → show=False, topic=finance, importance=4
+[11:13:04] 
+[18/27] MOH INVESTOR REMINDER: Molina Healthcare, Inc. Investors may have been Affected by Fraud -- Contact BFA Law if You Suffered Losses
+[11:13:04] 🧠 AI classify → 
+[11:13:04] → show=False, topic=other, importance=2
+[11:13:04] 
+[19/27] Disney World Charging Guests $350 for New Year’s Eve at Magic Kingdom, Details Revealed
+[11:13:04] 🧠 AI classify → 
+[11:13:04] → show=False, topic=other, importance=2
+[11:13:04] 
+[20/27] The return of Erik Prince
+[11:13:05] 🧠 AI classify → show=true; topic=geopolitics; importance=3 out
+[11:13:05] → show=True, topic=geopolitics, importance=3
+[11:13:05] 🧠 AI location guess → USA
+[11:13:07] 🗺️ Nominatim → USA → (39.7837, -100.4459)
+[11:13:07] 
+[21/27] IIT JAM 2026 form correction window opens: Submit changes by November 10 at joaps.iitb.ac.in
+[11:13:08] 🧠 AI classify → show=false; topic=other; importance=1
+title chinas xi jinping to visit russia for talks with putin
+description chinese president xi jinping is set to visit russia for high-level talks with president
+[11:13:08] → show=False, topic=other, importance=1
+[11:13:08] 
+[22/27] Louis Têtu: Why Canada has to get artificial intelligence right
+[11:13:08] 🧠 AI classify → show=true
+topic=tech
+importance=3
+[11:13:08] → show=True, topic=tech, importance=3
+[11:13:08] 🧠 AI location guess → Ottawa, Canada
+[11:13:10] 🗺️ Nominatim → Ottawa, Canada → (45.4209, -75.6901)
+[11:13:10] 
+[23/27] Serbians mark anniversary of fatal station collapse
+[11:13:11] 🧠 AI classify → show=true
+topic=disaster
+importance=3
+[11:13:11] → show=True, topic=disaster, importance=3
+[11:13:11] 🧠 AI location guess → Novi Sad, Serbia
+[11:13:13] 🗺️ Nominatim → Novi Sad, Serbia → (45.2551, 19.8452)
+[11:13:13] 
+[24/27] Berkshire worries grow as Buffett's CEO handover nears
+[11:13:13] 🧠 AI classify → 
+[11:13:13] → show=False, topic=other, importance=2
+[11:13:13] 
+[25/27] Nigeria’s Dangote Says Fuel Output Now Exceeds Local Demand
+[11:13:14] 🧠 AI classify → show=true; topic=economy; importance=3
+[11:13:14] → show=True, topic=economy, importance=3
+[11:13:15] 🧠 AI location guess → Nigeria, in this case, is the most directly involved country. However, the news does not specify
+[11:13:16] 
+[26/27] When the AI bubble pops
+[11:13:16] 🧠 AI classify → show=true
+topic=tech
+importance=4
+[11:13:16] → show=True, topic=tech, importance=4
+[11:13:16] 🧠 AI location guess → Washington, D.C., USA
+[11:13:18] 🗺️ Nominatim → Washington, D.C., USA → (38.8950, -77.0365)
+[11:13:18] 
+[27/27] Is AI a Circular Money Machine? 3 Reasons Not to Worry
+[11:13:18] 🧠 AI classify → s
+[11:13:18] → show=False, topic=other, importance=2
+[11:13:20] ⚠️ GDACS feed is not XML (HTML or error returned).
+[11:13:21] Fetched 189 old events.
+[11:13:22] ✅ PUSH COMPLETE: 197 total events.
+[11:13:22] === Job Complete ===

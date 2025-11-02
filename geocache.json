@@ -46,5 +46,33 @@
   "<s> [out] santa clara, usa": {
     "lat": 37.3365928,
     "lon": -121.8901449
+  },
+  "moscow, russia": {
+    "lat": 55.625578,
+    "lon": 37.6063916
+  },
+  "seoul, south korea": {
+    "lat": 37.5666791,
+    "lon": 126.9782914
+  },
+  "seattle, usa": {
+    "lat": 47.6038321,
+    "lon": -122.330062
+  },
+  "usa": {
+    "lat": 39.7837304,
+    "lon": -100.445882
+  },
+  "ottawa, canada": {
+    "lat": 45.4208777,
+    "lon": -75.6901106
+  },
+  "novi sad, serbia": {
+    "lat": 45.2551338,
+    "lon": 19.8451756
+  },
+  "washington, d.c., usa": {
+    "lat": 38.8950368,
+    "lon": -77.0365427
   }
 }
