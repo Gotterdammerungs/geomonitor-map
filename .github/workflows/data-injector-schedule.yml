@@ -42,35 +42,29 @@ jobs:
             pip install requests geopy
           fi
 
-      - name: Locate injector scripts
-        id: locate
+      - name: Preflight: ensure injector files exist
         run: |
-          NEWS_FILE=$(find . -type f -name "data_injector_news.py" | head -n 1)
-          HURR_FILE=$(find . -type f -name "data_injector_hurricanes.py" | head -n 1)
-
-          if [ -z "$NEWS_FILE" ] || [ -z "$HURR_FILE" ]; then
-            echo "❌ Could not locate one or both injector scripts."
-            find . -type f -name "data_injector*.py"
+          if [ ! -f ./data_injector.py ]; then
+            echo "ERROR: ./data_injector.py not found" >&2
             exit 2
           fi
-
-          echo "✅ Found injectors:"
-          echo "NEWS_FILE=$NEWS_FILE"
-          echo "HURR_FILE=$HURR_FILE"
-          echo "NEWS_PATH=$NEWS_FILE" >> $GITHUB_ENV
-          echo "HURR_PATH=$HURR_FILE" >> $GITHUB_ENV
+          if [ ! -f ./data_injector_hurricanes.py ]; then
+            echo "ERROR: ./data_injector_hurricanes.py not found" >&2
+            exit 2
+          fi
+          echo "✅ Found both injector scripts."
 
       - name: Syntax check injectors
         run: |
-          python -m py_compile "$NEWS_PATH"
-          python -m py_compile "$HURR_PATH"
+          python -m py_compile data_injector.py
+          python -m py_compile data_injector_hurricanes.py
           echo "✅ Syntax OK."
 
       - name: Run News Injector
         run: |
-          echo "=== Running $NEWS_PATH ==="
+          echo "=== Running data_injector.py ==="
           date --utc
-          python "$NEWS_PATH" 2>&1 | tee news-injector-output.log
+          python ./data_injector.py 2>&1 | tee news-injector-output.log
         env:
           FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
           NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
@@ -79,9 +73,9 @@ jobs:
 
       - name: Run Hurricane Injector
         run: |
-          echo "=== Running $HURR_PATH ==="
+          echo "=== Running data_injector_hurricanes.py ==="
           date --utc
-          python "$HURR_PATH" 2>&1 | tee hurricanes-injector-output.log
+          python ./data_injector_hurricanes.py 2>&1 | tee hurricanes-injector-output.log
         env:
           FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
 
