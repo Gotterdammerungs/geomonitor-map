@@ -106,3 +106,86 @@ def geocode_location(name):
         loc = geolocator_nom.geocode(name, timeout=10)
         if loc:
             lat, lon = float(loc.latitude), float(loc.longitude)
+            GEOCACHE[key] = {"lat": lat, "lon": lon}
+            persist_caches()
+            return lat, lon
+    except Exception:
+        pass
+    if geolocator_geo:
+        try:
+            loc = geolocator_geo.geocode(name, timeout=10)
+            if loc:
+                lat, lon = float(loc.latitude), float(loc.longitude)
+                GEOCACHE[key] = {"lat": lat, "lon": lon}
+                persist_caches()
+                return lat, lon
+        except Exception:
+            pass
+    return None, None
+
+# --- Fetch hurricanes (NEW) ---
+def fetch_hurricanes():
+    url = "https://www.gdacs.org/gdacsapi/api/eventsgeojson?eventtype=TC"
+    log("🌪️ Fetching hurricane data from GDACS...")
+    try:
+        r = requests.get(url, timeout=20)
+        r.raise_for_status()
+        data = r.json()
+        hurricanes = {}
+
+        for feature in data.get("features", []):
+            props = feature.get("properties", {})
+            coords = feature.get("geometry", {}).get("coordinates", [None, None])
+            lon, lat = coords if len(coords) == 2 else (None, None)
+            if not lat or not lon:
+                continue
+
+            key = f"hurricane_{props.get('eventid')}"
+            hurricanes[key] = {
+                "name": props.get("eventname", "Unnamed Cyclone"),
+                "country": props.get("country", "Unknown"),
+                "alertlevel": props.get("alertlevel", "green"),
+                "eventid": props.get("eventid", ""),
+                "fromdate": props.get("fromdate", ""),
+                "lat": lat,
+                "lon": lon,
+                "url": f"https://www.gdacs.org/report.aspx?eventid={props.get('eventid')}&eventtype=TC",
+            }
+
+        log(f"✅ Fetched {len(hurricanes)} hurricanes.")
+        return hurricanes
+
+    except Exception as e:
+        log(f"❌ Hurricane fetch failed: {e}")
+        return {}
+
+# --- Firebase push ---
+def push_to_firebase(node, data):
+    fb_url = f"{FIREBASE_URL}/{node}.json"
+    try:
+        r = requests.put(fb_url, data=json.dumps(data), timeout=20)
+        r.raise_for_status()
+        log(f"✅ Pushed {len(data)} items to /{node}")
+    except Exception as e:
+        log(f"❌ Firebase push failed for {node}: {e}")
+
+# --- Main ---
+if __name__ == "__main__":
+    log("=== Starting Data Injection Job ===")
+
+    # Your normal news fetch
+    from data_injector_news import fetch_and_process  # (optional modular separation)
+    news_events = fetch_and_process()
+    if news_events:
+        push_to_firebase("events", news_events)
+    else:
+        log("⚠️ No new news events.")
+
+    # New hurricane fetch
+    hurricanes = fetch_hurricanes()
+    if hurricanes:
+        push_to_firebase("hurricanes", hurricanes)
+    else:
+        log("⚠️ No hurricanes fetched.")
+
+    log("=== Job Complete ===")
