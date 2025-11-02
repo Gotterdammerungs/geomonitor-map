@@ -1,104 +1,104 @@
-[11:14:20] Booting Geomonitor Data Injector...
-[11:14:20] Firebase URL: https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app
-[11:14:20] NewsAPI key: ✅ Present
-[11:14:20] Geoapify key: ✅ Present
-[11:14:20] OpenRouter key: ✅ Present
-[11:14:20] ✅ Initialized Nominatim geocoder (Geoapify unavailable).
-[11:14:20] === Starting Data Injection Job ===
-[11:14:20] Fetching news: https://newsapi.org/v2/everything?q=geopolitics%20OR%20international%20relations%20OR%20war%20OR%20conflict%20OR%20finance%20OR%20stock%20market%20OR%20economic%20crisis%20OR%20technology%20OR%20AI%20OR%20semiconductor%20OR%20cyber%20attack%20OR%20natural%20disaster%20OR%20earthquake%20OR%20hurricane&language=en&sortBy=publishedAt&pageSize=30&apiKey=7f0c06cb96494e1ca7e86eace438fd29
-[11:14:20] Fetched 28 raw articles.
-[11:14:20] Filtered down to 27 articles.
-[11:14:20] 
+[11:15:07] Booting Geomonitor Data Injector...
+[11:15:07] Firebase URL: https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app
+[11:15:07] NewsAPI key: ✅ Present
+[11:15:07] Geoapify key: ✅ Present
+[11:15:07] OpenRouter key: ✅ Present
+[11:15:07] ✅ Initialized Nominatim geocoder (Geoapify unavailable).
+[11:15:07] === Starting Data Injection Job ===
+[11:15:07] Fetching news: https://newsapi.org/v2/everything?q=geopolitics%20OR%20international%20relations%20OR%20war%20OR%20conflict%20OR%20finance%20OR%20stock%20market%20OR%20economic%20crisis%20OR%20technology%20OR%20AI%20OR%20semiconductor%20OR%20cyber%20attack%20OR%20natural%20disaster%20OR%20earthquake%20OR%20hurricane&language=en&sortBy=publishedAt&pageSize=30&apiKey=7f0c06cb96494e1ca7e86eace438fd29
+[11:15:08] Fetched 28 raw articles.
+[11:15:08] Filtered down to 27 articles.
+[11:15:08] 
 [1/27] Meet Gen. Kenneth Wilsbach, the new US Air Force Chief of Staff: Massive challenges await him as he takes charge; a look at his career and challenges ahead
-[11:14:20] → show=False, topic=other, importance=2
-[11:14:20] 
+[11:15:08] → show=False, topic=other, importance=2
+[11:15:08] 
 [2/27] YouTube CEO emphasizes AI as the next technological frontier
-[11:14:20] → show=False, topic=tech, importance=3
-[11:14:20] 
+[11:15:08] → show=False, topic=tech, importance=3
+[11:15:08] 
 [3/27] Ukraine Claims Successful Strike on Moscow Pipeline That Supplies Russian Forces
-[11:14:20] → show=True, topic=geopolitics, importance=5
-[11:14:20] 🧠 AI location guess → Moscow, Russia
-[11:14:20] 
+[11:15:08] → show=True, topic=geopolitics, importance=5
+[11:15:09] 🧠 AI location guess → Moscow, Russia
+[11:15:09] 
 [4/27] Istanbul Airport has sleep pods, therapy dogs, and the world's biggest terminal. Its CEO explains how it went from zero to the world's best in 5 years.
-[11:14:20] → show=False, topic=other, importance=2
-[11:14:20] 
+[11:15:09] → show=False, topic=other, importance=2
+[11:15:09] 
 [5/27] AR glasses blur the lines of when it’s obvious a company is collecting your data, privacy expert says
-[11:14:20] → show=True, topic=tech, importance=4
-[11:14:21] 🧠 AI location guess → Washington, D.C., USA (based on the fact that Joe Jones is the director of research
-[11:14:23] 
+[11:15:09] → show=True, topic=tech, importance=4
+[11:15:09] 🧠 AI location guess → <s> [OUT] USA
+[11:15:09] 
 [6/27] Parents are reverting to landline phones to stop their kids becoming smartphone addicts
-[11:14:23] → show=False, topic=social, importance=1
-[11:14:23] 
+[11:15:09] → show=False, topic=social, importance=1
+[11:15:09] 
 [7/27] Israel: Returned Remains of 3 Aren't Hostages
-[11:14:23] → show=False, topic=other, importance=2
-[11:14:23] 
+[11:15:09] → show=False, topic=other, importance=2
+[11:15:09] 
 [8/27] Siemens turns to software to manage AI’s power surge
-[11:14:23] → show=False, topic=other, importance=2
-[11:14:23] 
+[11:15:09] → show=False, topic=other, importance=2
+[11:15:09] 
 [9/27] Microsoft Confirms Free Windows 10 Security Updates — How To Get Them
-[11:14:23] → show=False, topic=other, importance=2
-[11:14:23] 
+[11:15:09] → show=False, topic=other, importance=2
+[11:15:09] 
 [10/27] Jensen Huang's Seoul dinner with Samsung, Hyundai chiefs sparks 'AI Korea' speculation
-[11:14:23] → show=True, topic=tech, importance=4
-[11:14:23] 🧠 AI location guess → Seoul, South Korea
-[11:14:23] 
+[11:15:09] → show=True, topic=tech, importance=4
+[11:15:10] 🧠 AI location guess → Seoul, South Korea
+[11:15:10] 
 [11/27] The World Must Demand the Release of Palestinian Leader Marwan Barghouti
-[11:14:23] → show=False, topic=other, importance=2
-[11:14:23] 
+[11:15:10] → show=False, topic=other, importance=2
+[11:15:10] 
 [12/27] How an 'accidental banker' is turning this LA-based investment bank into one of the biggest deal machines
-[11:14:23] → show=False, topic=finance, importance=3
-[11:14:23] 
+[11:15:10] → show=False, topic=finance, importance=3
+[11:15:10] 
 [13/27] What to Do in Portland, Oregon If You're Here for Business (2025)
-[11:14:23] → show=False, topic=other, importance=1
-[11:14:23] 
+[11:15:10] → show=False, topic=other, importance=1
+[11:15:10] 
 [14/27] MLTX INVESTOR REMINDER: MoonLake Immunotherapeutics Investors may have been Affected by Fraud -- Contact BFA Law if You Suffered Losses
-[11:14:23] → show=False, topic=other, importance=2
-[11:14:23] 
+[11:15:10] → show=False, topic=other, importance=2
+[11:15:10] 
 [15/27] Taiwan researchers develop tool to block harmful GenAI content
-[11:14:23] → show=False, topic=other, importance=2
-[11:14:23] 
+[11:15:10] → show=False, topic=other, importance=2
+[11:15:10] 
 [16/27] Leftward lurch: Second socialist leader ready to rule another iconic American city
-[11:14:23] → show=True, topic=social, importance=4
-[11:14:23] 🧠 AI location guess → Seattle, USA
-[11:14:23] 
+[11:15:10] → show=True, topic=social, importance=4
+[11:15:10] 🧠 AI location guess → Seattle, USA
+[11:15:10] 
 [17/27] JHX INVESTOR REMINDER: James Hardie Industries plc Investors may have been Affected by Fraud -- Contact BFA Law if You Suffered Losses
-[11:14:23] → show=False, topic=finance, importance=4
-[11:14:23] 
+[11:15:10] → show=False, topic=finance, importance=4
+[11:15:10] 
 [18/27] MOH INVESTOR REMINDER: Molina Healthcare, Inc. Investors may have been Affected by Fraud -- Contact BFA Law if You Suffered Losses
-[11:14:23] → show=False, topic=other, importance=2
-[11:14:23] 
+[11:15:10] → show=False, topic=other, importance=2
+[11:15:10] 
 [19/27] Disney World Charging Guests $350 for New Year’s Eve at Magic Kingdom, Details Revealed
-[11:14:23] → show=False, topic=other, importance=2
-[11:14:23] 
+[11:15:10] → show=False, topic=other, importance=2
+[11:15:10] 
 [20/27] The return of Erik Prince
-[11:14:23] → show=True, topic=geopolitics, importance=3
-[11:14:23] 🧠 AI location guess → <s> [OUT] USA
-[11:14:23] 
+[11:15:10] → show=True, topic=geopolitics, importance=3
+[11:15:11] 🧠 AI location guess → <s> [OUT] USA
+[11:15:11] 
 [21/27] IIT JAM 2026 form correction window opens: Submit changes by November 10 at joaps.iitb.ac.in
-[11:14:23] → show=False, topic=other, importance=1
-[11:14:23] 
+[11:15:11] → show=False, topic=other, importance=1
+[11:15:11] 
 [22/27] Louis Têtu: Why Canada has to get artificial intelligence right
-[11:14:23] → show=True, topic=tech, importance=3
-[11:14:24] 🧠 AI location guess → <s> [OUT] Ottawa, Canada
-[11:14:26] 
+[11:15:11] → show=True, topic=tech, importance=3
+[11:15:11] 🧠 AI location guess → Ottawa, Canada
+[11:15:11] 
 [23/27] Serbians mark anniversary of fatal station collapse
-[11:14:26] → show=True, topic=disaster, importance=3
-[11:14:26] 🧠 AI location guess → Novi Sad, Serbia
-[11:14:26] 
+[11:15:11] → show=True, topic=disaster, importance=3
+[11:15:15] 🧠 AI location guess → Novi Sad, Serbia
+[11:15:15] 
 [24/27] Berkshire worries grow as Buffett's CEO handover nears
-[11:14:26] → show=False, topic=other, importance=2
-[11:14:26] 
+[11:15:15] → show=False, topic=other, importance=2
+[11:15:15] 
 [25/27] Nigeria’s Dangote Says Fuel Output Now Exceeds Local Demand
-[11:14:26] → show=True, topic=economy, importance=3
-[11:14:27] 🧠 AI location guess → Nigeria
-[11:14:27] 
+[11:15:15] → show=True, topic=economy, importance=3
+[11:15:15] 🧠 AI location guess → Nigeria
+[11:15:15] 
 [26/27] When the AI bubble pops
-[11:14:27] → show=True, topic=tech, importance=4
-[11:14:27] 🧠 AI location guess → Washington, D.C., USA (based on the mention of the White House)
-[11:14:29] 
+[11:15:15] → show=True, topic=tech, importance=4
+[11:15:16] 🧠 AI location guess → Washington, D.C., USA
+[11:15:16] 
 [27/27] Is AI a Circular Money Machine? 3 Reasons Not to Worry
-[11:14:29] → show=False, topic=other, importance=2
-[11:14:29] ⚠️ GDACS feed is not XML (HTML or error returned).
-[11:14:30] Fetched 213 old events.
-[11:14:31] ✅ PUSH COMPLETE: 219 total events.
-[11:14:31] === Job Complete ===
+[11:15:16] → show=False, topic=other, importance=2
+[11:15:18] ⚠️ GDACS feed is not XML (HTML or error returned).
+[11:15:19] Fetched 219 old events.
+[11:15:20] ✅ PUSH COMPLETE: 228 total events.
+[11:15:20] === Job Complete ===
