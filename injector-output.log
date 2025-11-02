@@ -1,93 +1,93 @@
-[11:03:02] Booting Geomonitor Data Injector...
-[11:03:02] Firebase URL: https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app
-[11:03:02] NewsAPI key: ✅ Present
-[11:03:02] Geoapify key: ✅ Present
-[11:03:02] OpenRouter key: ✅ Present
-[11:03:02] ✅ Initialized Nominatim geocoder (Geoapify unavailable).
-[11:03:02] === Starting Data Injection Job ===
-[11:03:02] Fetching news: https://newsapi.org/v2/everything?q=geopolitics%20OR%20international%20relations%20OR%20war%20OR%20conflict%20OR%20finance%20OR%20stock%20market%20OR%20economic%20crisis%20OR%20technology%20OR%20AI%20OR%20semiconductor%20OR%20cyber%20attack%20OR%20natural%20disaster%20OR%20earthquake%20OR%20hurricane&language=en&sortBy=publishedAt&pageSize=30&apiKey=7f0c06cb96494e1ca7e86eace438fd29
-[11:03:02] Fetched 27 raw articles.
-[11:03:02] Filtered down to 26 articles.
-[11:03:02] 
+[11:05:09] Booting Geomonitor Data Injector...
+[11:05:09] Firebase URL: https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app
+[11:05:09] NewsAPI key: ✅ Present
+[11:05:09] Geoapify key: ✅ Present
+[11:05:09] OpenRouter key: ✅ Present
+[11:05:09] ✅ Initialized Nominatim geocoder (Geoapify unavailable).
+[11:05:09] === Starting Data Injection Job ===
+[11:05:09] Fetching news: https://newsapi.org/v2/everything?q=geopolitics%20OR%20international%20relations%20OR%20war%20OR%20conflict%20OR%20finance%20OR%20stock%20market%20OR%20economic%20crisis%20OR%20technology%20OR%20AI%20OR%20semiconductor%20OR%20cyber%20attack%20OR%20natural%20disaster%20OR%20earthquake%20OR%20hurricane&language=en&sortBy=publishedAt&pageSize=30&apiKey=7f0c06cb96494e1ca7e86eace438fd29
+[11:05:09] Fetched 27 raw articles.
+[11:05:09] Filtered down to 26 articles.
+[11:05:09] 
 [1/26] Ognissanti, in Spagna la visita ai cari defunti
-[11:03:02] → show=False, topic=social, importance=1
-[11:03:02] 
+[11:05:09] → show=False, topic=social, importance=1
+[11:05:09] 
 [2/26] Urban Company revenues jump 37% even as it posts losses
-[11:03:02] → show=False, topic=other, importance=2
-[11:03:02] 
+[11:05:09] → show=False, topic=other, importance=2
+[11:05:09] 
 [3/26] 8 ways to help your teams build lasting responsible AI
-[11:03:02] → show=False, topic=tech, importance=3
-[11:03:02] 
+[11:05:09] → show=False, topic=tech, importance=3
+[11:05:09] 
 [4/26] Dogecoin Enters The Big Leagues — Stadium And Jerseys Get A Crypto Makeover
-[11:03:02] → show=False, topic=other, importance=2
-[11:03:02] 
+[11:05:09] → show=False, topic=other, importance=2
+[11:05:09] 
 [5/26] Louis Têtu: Why Canada has to get artificial intelligence right
-[11:03:02] → show=False, topic=other, importance=2
-[11:03:02] 
+[11:05:09] → show=False, topic=other, importance=2
+[11:05:09] 
 [6/26] ChatGPT Atlas AI Browser : The Future of Surfing the Web
-[11:03:02] → show=False, topic=tech, importance=3
-[11:03:02] 
+[11:05:09] → show=False, topic=tech, importance=3
+[11:05:09] 
 [7/26] A doctor’s fight to repair, not replace
-[11:03:02] → show=False, topic=science, importance=3
-[11:03:02] 
+[11:05:09] → show=False, topic=science, importance=3
+[11:05:09] 
 [8/26] Nvidia's dizzying week of dealmaking
-[11:03:02] → show=True, topic=tech, importance=4
-[11:03:03] 🧠 AI location guess → <s> [OUT] Santa Clara, USA
-[11:03:03] 
+[11:05:09] → show=True, topic=tech, importance=4
+[11:05:10] 🧠 AI location guess → <s> [OUT] Santa Clara, USA
+[11:05:10] 
 [9/26] My Hero Academia's Successor Is Already Here: Meet To Be Hero X
-[11:03:03] → show=False, topic=other, importance=1
-[11:03:03] 
+[11:05:10] → show=False, topic=other, importance=1
+[11:05:10] 
 [10/26] This open-source bookmarks sync tool just freed me from Google Chrome
-[11:03:03] → show=False, topic=tech, importance=1
-[11:03:03] 
+[11:05:10] → show=False, topic=tech, importance=1
+[11:05:10] 
 [11/26] 27 Shoes For Anyone Who Wants Comfy Feet But Doesn’t Want Sneakers
-[11:03:03] → show=False, topic=other, importance=2
-[11:03:03] 
+[11:05:10] → show=False, topic=other, importance=2
+[11:05:10] 
 [12/26] 'Mankeeping' Might Explain Why More Straight Women Are Staying Single
-[11:03:03] → show=False, topic=social, importance=1
-[11:03:03] 
+[11:05:10] → show=False, topic=social, importance=1
+[11:05:10] 
 [13/26] Too Cold Or Dark Outside To Walk? Try This Instead.
-[11:03:03] → show=False, topic=other, importance=1
-[11:03:03] 
+[11:05:10] → show=False, topic=other, importance=1
+[11:05:10] 
 [14/26] 'Orthosomnia' Might Be Ruining Your Sleep. Here's What You Should Know.
-[11:03:03] → show=False, topic=other, importance=1
-[11:03:03] 
+[11:05:10] → show=False, topic=other, importance=1
+[11:05:10] 
 [15/26] These People ‘Convinced’ Their Partner To Have Kids. Here's How That Worked Out For Them.
-[11:03:03] → show=False, topic=social, importance=1
-[11:03:03] 
+[11:05:10] → show=False, topic=social, importance=1
+[11:05:10] 
 [16/26] Taiwan solar maker pushes storm-proof technology and niche strategy in U.S. and Japan markets
-[11:03:03] → show=False, topic=other, importance=2
-[11:03:03] 
+[11:05:10] → show=False, topic=other, importance=2
+[11:05:10] 
 [17/26] Verizon is in crisis: Here’s what its new CEO must do to turn things around
-[11:03:03] → show=False, topic=other, importance=2
-[11:03:03] 
+[11:05:10] → show=False, topic=other, importance=2
+[11:05:10] 
 [18/26] Warning to rest of NFL: Davante Adams-Matthew Stafford attack heating up for Rams
-[11:03:03] → show=False, topic=other, importance=1
-[11:03:03] 
+[11:05:10] → show=False, topic=other, importance=1
+[11:05:10] 
 [19/26] The Slow Death of Special Education
-[11:03:03] → show=False, topic=social, importance=3
-[11:03:03] 
+[11:05:10] → show=False, topic=social, importance=3
+[11:05:10] 
 [20/26] Self-Forgetfulness: George Kinder’s Key To Finding—And Being—A True Fiduciary
-[11:03:03] → show=False, topic=finance, importance=2
-[11:03:03] 
+[11:05:10] → show=False, topic=finance, importance=2
+[11:05:10] 
 [21/26] Your Moral Code Has Christian Roots Whether You Know It or Not
-[11:03:03] → show=False, topic=social, importance=1
-[11:03:03] 
+[11:05:10] → show=False, topic=social, importance=1
+[11:05:10] 
 [22/26] Two Apple devices you really shouldn't buy this month (and 9 that are safe for now)
-[11:03:03] → show=False, topic=tech, importance=2
-[11:03:03] 
+[11:05:10] → show=False, topic=tech, importance=2
+[11:05:10] 
 [23/26] Mutuum Finance (MUTM) Completes Roadmap Phase 1 as V1 Protocol Launch Nears
-[11:03:03] → show=False, topic=other, importance=2
-[11:03:03] 
+[11:05:10] → show=False, topic=other, importance=2
+[11:05:10] 
 [24/26] How Childhood Relationships Affect Your Adult Attachment Style, according to Large New Study
-[11:03:03] → show=False, topic=social, importance=1
-[11:03:03] 
+[11:05:10] → show=False, topic=social, importance=1
+[11:05:10] 
 [25/26] Penn State vs. Ohio State prediction: Odds, picks, best bet for Big Ten clash
-[11:03:03] → show=False, topic=other, importance=1
-[11:03:03] 
+[11:05:10] → show=False, topic=other, importance=1
+[11:05:10] 
 [26/26] The ‘10 Martini’ Proof Connects Quantum Mechanics With Infinitely Intricate Mathematical Structures
-[11:03:03] → show=False, topic=science, importance=1
-[11:03:04] ⚠️ GDACS feed is not XML (HTML or error returned).
-[11:03:04] Fetched 187 old events.
-[11:03:05] ✅ PUSH COMPLETE: 188 total events.
-[11:03:05] === Job Complete ===
+[11:05:10] → show=False, topic=science, importance=1
+[11:05:11] ⚠️ GDACS feed is not XML (HTML or error returned).
+[11:05:12] Fetched 188 old events.
+[11:05:13] ✅ PUSH COMPLETE: 189 total events.
+[11:05:13] === Job Complete ===
