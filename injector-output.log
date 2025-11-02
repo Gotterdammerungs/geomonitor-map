@@ -1,102 +1,124 @@
-[10:50:11] Booting Geomonitor Data Injector...
-[10:50:11] Firebase URL: https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app
-[10:50:11] NewsAPI key: ✅ Present
-[10:50:11] Geoapify key: ✅ Present
-[10:50:11] OpenRouter key: ✅ Present
-[10:50:11] 📘 Loaded 1275 dictionary entries from dictionary.json
-[10:50:12] ✅ Initialized Nominatim geocoder (Geoapify unavailable).
-[10:50:12] === Starting Data Injection Job ===
-[10:50:12] Fetching news: https://newsapi.org/v2/everything?q=geopolitics%20OR%20international%20relations%20OR%20war%20OR%20conflict%20OR%20finance%20OR%20stock%20market%20OR%20economic%20crisis%20OR%20technology%20OR%20AI%20OR%20semiconductor%20OR%20cyber%20attack%20OR%20natural%20disaster%20OR%20earthquake%20OR%20hurricane&language=en&sortBy=publishedAt&pageSize=30&apiKey=7f0c06cb96494e1ca7e86eace438fd29
-[10:50:12] Fetched 29 raw articles.
-[10:50:12] Filtered down to 26 articles.
-[10:50:12] 
-[1/26] Give up 'failed path' of armed struggle, join mainstream: Surrendered Naxal Bhupathi to comrades
-[10:50:12] → show=True, topic=geopolitics, importance=3
-[10:50:12] 🧠 AI location guess → Gadchiroli, India
-[10:50:12] 
-[2/26] Woman Aghast as 14 Data Centers Move Next Door, Emits Terrible Stench
-[10:50:12] → show=False, topic=other, importance=2
-[10:50:12] 
-[3/26] Overton Window Speedrun: British Voters Now More Right-Wing on Immigration Than Americans
-[10:50:12] → show=True, topic=geopolitics, importance=4
-[10:50:12] 🧠 AI location guess → United Kingdom (specifically, the country as a whole, not a specific city)
-[10:50:14] 
-[4/26] Nvidia emerges as TSMC's first A16 customer, while Apple may skip to A14
-[10:50:14] → show=False, topic=other, importance=2
-[10:50:14] 
-[5/26] US urges ASEAN to be firm in countering China in the South China Sea
-[10:50:14] → show=True, topic=geopolitics, importance=5
-[10:50:14] 🧠 AI location guess → Beijing, China (for China) and Washington, D.C., USA (for the United States
-[10:50:16] 
-[6/26] I'm the CEO behind the New York Marathon. Here's how we pull off the world's biggest race.
-[10:50:16] → show=False, topic=other, importance=1
-[10:50:16] 
-[7/26] Asean reaffirms 'no nukes' stance, says Defence Minister
-[10:50:16] → show=True, topic=geopolitics, importance=4
-[10:50:17] 🧠 AI location guess → KUALA LUMPUR
-[10:50:17] 
-[8/26] Housing market inventory shift: 17 states where buyers are winning back power
-[10:50:17] → show=False, topic=other, importance=1
-[10:50:17] 
-[9/26] BYD's October vehicle sales down 12% from year earlier
-[10:50:17] → show=True, topic=tech, importance=2
-[10:50:17] 🧠 AI location guess → <s> [OUT] China
-[10:50:17] 
-[10/26] IonQ: Quantum Progress Meets Market Reality
-[10:50:17] → show=False, topic=tech, importance=3
-[10:50:17] 
-[11/26] Jamaican town reduced to rubble by Hurricane Melissa
-[10:50:17] → show=False, topic=other, importance=2
-[10:50:17] 
-[12/26] Taiwan’s quantum talent gap widens as Dutch model highlights what’s missing
-[10:50:17] → show=True, topic=tech, importance=4
-[10:50:18] 🧠 AI location guess → <s> [OUT] Taiwan
-[10:50:18] 
-[13/26] BYD's October vehicle sales down 12% from year earlier
-[10:50:18] → show=False, topic=other, importance=2
-[10:50:18] 
-[14/26] This Simple Habit Can Improve Focus & Concentration, Study Finds
-[10:50:18] → show=False, topic=social, importance=1
-[10:50:18] 
-[15/26] China signals easing of Nexperia chip export ban after talks with US, EU
-[10:50:18] → show=False, topic=other, importance=2
-[10:50:18] 
-[16/26] Foreign Secretary speech at the 21st Manama Dialogue Conference in Bahrain
-[10:50:18] → show=True, topic=geopolitics, importance=4
-[10:50:19] 🧠 AI location guess → Manama, Bahrain
-[10:50:19] 
-[17/26] Taiwan analytics firm wins Canadian telecom deal, marking North American debut
-[10:50:19] → show=False, topic=other, importance=2
-[10:50:19] 
-[18/26] Dalal Street Week Ahead: Technical charts signal bullish bias despite mild fatigue
-[10:50:19] → show=False, topic=finance, importance=2
-[10:50:19] 
-[19/26] National Library prepares materials on nutrition to support MBG
-[10:50:19] → show=False, topic=other, importance=1
-[10:50:19] 
-[20/26] Linux 6.18 Kernel Happenings, Python 3.14, NTFSPLUS & Other October Highlights
-[10:50:19] → show=False, topic=other, importance=2
-[10:50:19] 
-[21/26] F&O Talk| Nifty logs 11 sessions of tight moves post 1,500-point rally. Here are the key levels Sudeep Shah is eyeing
-[10:50:19] → show=False, topic=other, importance=2
-[10:50:19] 
-[22/26] NES Friday the 13th and NECA in The Daily LITG, 1st November, 2025
-[10:50:19] → show=False, topic=other, importance=2
-[10:50:19] 
-[23/26] orq-ai-sdk 3.14.7
-[10:50:19] → show=False, topic=tech, importance=1
-[10:50:19] 
-[24/26] Inflation Rises in Turkey’s Biggest City Ahead of National Data
-[10:50:19] → show=False, topic=other, importance=2
-[10:50:19] 
-[25/26] China's Xi pushes for global AI body at APEC in counter to U.S. - CNBC
-[10:50:19] → show=True, topic=geopolitics, importance=5
-[10:50:19] 🧠 AI location guess → <s> [OUT] China
-[10:50:19] 
-[26/26] On the island of Belene, Bulgarian communism’s forgotten prison
-[10:50:19] → show=True, topic=social, importance=2
-[10:50:20] 🧠 AI location guess → Bulgaria
-[10:50:21] Fetched 168 old events.
-[10:50:21] ✅ PUSH COMPLETE: 175 total events.
-[10:50:22] ⚠️ GDACS fetch failed: not well-formed (invalid token): line 1, column 1
-[10:50:22] === Job Complete ===
+[10:53:26] Booting Geomonitor Data Injector...
+[10:53:26] Firebase URL: https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app
+[10:53:26] NewsAPI key: ✅ Present
+[10:53:26] Geoapify key: ✅ Present
+[10:53:26] OpenRouter key: ✅ Present
+[10:53:26] ✅ Initialized Nominatim geocoder (Geoapify unavailable).
+[10:53:26] === Starting Data Injection Job ===
+[10:53:26] Fetching news: https://newsapi.org/v2/everything?q=geopolitics%20OR%20international%20relations%20OR%20war%20OR%20conflict%20OR%20finance%20OR%20stock%20market%20OR%20economic%20crisis%20OR%20technology%20OR%20AI%20OR%20semiconductor%20OR%20cyber%20attack%20OR%20natural%20disaster%20OR%20earthquake%20OR%20hurricane&language=en&sortBy=publishedAt&pageSize=30&apiKey=7f0c06cb96494e1ca7e86eace438fd29
+[10:53:26] Fetched 29 raw articles.
+[10:53:26] Filtered down to 26 articles.
+[10:53:26] 
+[1/26] China signals easing of Nexperia semiconductor export ban - Financial Times
+[10:53:27] 🧠 AI classify → show=true
+topic=tech
+importance=4
+[10:53:27] → show=True, topic=tech, importance=4
+[10:53:28] 🧠 AI location guess → <s> [OUT] China
+[10:53:28] 
+[2/26] US trade pact does not force M'sia into blind compliance, says Tengku Zafrul
+[10:53:28] 🧠 AI classify → 
+[10:53:28] → show=False, topic=other, importance=2
+[10:53:28] 
+[3/26] Pet Health Products Market, By Application
+[10:53:31] 🧠 AI classify → show=false; topic=other; importance=1
+title chinas xi jinping to visit russia for talks with putin
+description chinese president xi jinping is set to visit russia for a three-day summit with russian president
+[10:53:31] → show=False, topic=other, importance=1
+[10:53:31] 
+[4/26] The Brokerage That Makes More From Fewer Clients: Is Interactive Brokers Still Undervalued?
+[10:53:31] 🧠 AI classify → show=true
+topic=finance
+importance=4
+[10:53:31] → show=True, topic=finance, importance=4
+[10:53:32] 🧠 AI location guess → The news title and description do not specify a particular city or country. However, Interactive Brokers
+[10:53:34] 
+[5/26] Man narrowly avoids disaster as 'one-in-a-billion' meteorite smashes into windscreen while driving brand new Tesla
+[10:53:35] 🧠 AI classify → show=false; topic=disaster; importance=1 s
+[10:53:35] → show=False, topic=disaster, importance=1
+[10:53:35] 
+[6/26] Public school districts coast to coast adopting radical curriculum from org named for 60s radical
+[10:53:35] 🧠 AI classify → show=true
+topic=social
+importance=4
+[10:53:35] → show=True, topic=social, importance=4
+[10:53:36] 🧠 AI location guess → <s> [OUT] USA
+[10:53:40] 🗺️ Nominatim → <s> [OUT] USA → (44.1121, -73.8237)
+[10:53:40] 
+[7/26] Carney says he told Ontario premier not to run anti-tariff ad, apologized to Trump
+[10:53:41] 🧠 AI classify → show=true; topic=geopolitics; importance=3 s
+[10:53:41] → show=True, topic=geopolitics, importance=3
+[10:53:41] 🧠 AI location guess → Ontario, Canada (based on the mention of Ontario Premier Doug Ford)
+[10:53:42] 
+[8/26] US offer of assistance to Asean must be based on ADMM framework
+[10:53:43] 🧠 AI classify → 
+[10:53:43] → show=False, topic=other, importance=2
+[10:53:43] 
+[9/26] India’s net GST collection stays flat in October; gross up 4.6%
+[10:53:43] 🧠 AI classify → 
+[10:53:43] → show=False, topic=other, importance=2
+[10:53:43] 
+[10/26] Bengaluru techie's one irrational decision turned his business into a global brand in six years. 'Everyone thought I had lost it'
+[10:53:44] 🧠 AI classify → show=false; topic=social; importance=1
+[10:53:44] → show=False, topic=social, importance=1
+[10:53:44] 
+[11/26] New Casio Pro Trek 30th anniversary watches with gold accents unveiled
+[10:53:45] 🧠 AI classify → 
+[10:53:45] → show=False, topic=other, importance=2
+[10:53:45] 
+[12/26] Bharat Narang on his role in Satyaa Sachee: Vikrant allows me to step out of my comfort zone and try something different
+[10:53:46] 🧠 AI classify → show=false; topic=other; importance=1
+[10:53:46] → show=False, topic=other, importance=1
+[10:53:46] 
+[13/26] Give up 'failed path' of armed struggle, join mainstream: Surrendered Naxal Bhupathi to comrades
+[10:53:46] → show=True, topic=geopolitics, importance=3
+[10:53:46] 🧠 AI location guess → Gadchiroli, India
+[10:53:46] 
+[14/26] Woman Aghast as 14 Data Centers Move Next Door, Emits Terrible Stench
+[10:53:46] → show=False, topic=other, importance=2
+[10:53:46] 
+[15/26] Overton Window Speedrun: British Voters Now More Right-Wing on Immigration Than Americans
+[10:53:46] → show=True, topic=geopolitics, importance=4
+[10:53:48] 🧠 AI location guess → <s> [OUT] United Kingdom
+[10:53:48] 
+[16/26] Nvidia emerges as TSMC's first A16 customer, while Apple may skip to A14
+[10:53:48] → show=False, topic=other, importance=2
+[10:53:48] 
+[17/26] US urges ASEAN to be firm in countering China in the South China Sea
+[10:53:48] → show=True, topic=geopolitics, importance=5
+[10:53:48] 🧠 AI location guess → China
+[10:53:50] 🗺️ Nominatim → China → (35.0001, 104.9999)
+[10:53:50] 
+[18/26] I'm the CEO behind the New York Marathon. Here's how we pull off the world's biggest race.
+[10:53:50] → show=False, topic=other, importance=1
+[10:53:50] 
+[19/26] Asean reaffirms 'no nukes' stance, says Defence Minister
+[10:53:50] → show=True, topic=geopolitics, importance=4
+[10:53:50] 🧠 AI location guess → <s> [OUT] Kuala Lumpur, Malaysia
+[10:53:52] 
+[20/26] Housing market inventory shift: 17 states where buyers are winning back power
+[10:53:52] → show=False, topic=other, importance=1
+[10:53:52] 
+[21/26] BYD's October vehicle sales down 12% from year earlier
+[10:53:52] → show=True, topic=tech, importance=2
+[10:53:53] 🧠 AI location guess → <s> [OUT] China
+[10:53:53] 
+[22/26] IonQ: Quantum Progress Meets Market Reality
+[10:53:53] → show=False, topic=tech, importance=3
+[10:53:53] 
+[23/26] Jamaican town reduced to rubble by Hurricane Melissa
+[10:53:53] → show=False, topic=other, importance=2
+[10:53:53] 
+[24/26] Taiwan’s quantum talent gap widens as Dutch model highlights what’s missing
+[10:53:53] → show=True, topic=tech, importance=4
+[10:53:53] 🧠 AI location guess → Taiwan, in this case. The news article discusses a seminar held in Taiwan by the Taiwan
+[10:53:55] 
+[25/26] BYD's October vehicle sales down 12% from year earlier
+[10:53:55] → show=False, topic=other, importance=2
+[10:53:55] 
+[26/26] This Simple Habit Can Improve Focus & Concentration, Study Finds
+[10:53:55] → show=False, topic=social, importance=1
+[10:53:56] ⚠️ GDACS feed is not XML (HTML or error returned).
+[10:53:56] Fetched 175 old events.
+[10:53:57] ✅ PUSH COMPLETE: 181 total events.
+[10:53:57] === Job Complete ===
