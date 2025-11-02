@@ -47,12 +47,17 @@ jobs:
             echo "ERROR: ./data_injector_hurricanes.py not found" >&2
             exit 2
           fi
-          echo "✅ Found both injector scripts."
+          if [ ! -f ./deploy_site.py ]; then
+            echo "ERROR: ./deploy_site.py not found" >&2
+            exit 2
+          fi
+          echo "✅ Found injector and deploy scripts."
 
       - name: "Syntax check injectors"
         run: |
           python -m py_compile data_injector.py
           python -m py_compile data_injector_hurricanes.py
+          python -m py_compile deploy_site.py
           echo "✅ Syntax OK."
 
       - name: "Run News Injector"
@@ -74,6 +79,15 @@ jobs:
         env:
           FIREBASE_URL: "${{ secrets.FIREBASE_URL }}"
 
+      - name: "Deploy website"
+        run: |
+          echo "=== Running deploy_site.py ==="
+          date --utc
+          python ./deploy_site.py 2>&1 | tee deploy-output.log
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+
       - name: "Upload injector logs"
         if: always()
         uses: actions/upload-artifact@v4
@@ -82,3 +96,4 @@ jobs:
           path: |
             news-injector-output.log
             hurricanes-injector-output.log
+            deploy-output.log
