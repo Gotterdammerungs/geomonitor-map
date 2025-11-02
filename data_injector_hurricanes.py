@@ -1,123 +1,121 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Geomonitor Hurricane Data Injector
-----------------------------------
-Fetches tropical cyclone data from GDACS (Global Disaster Alert and Coordination System)
-and pushes it to Firebase in GeoJSON-like format.
+data_injector_hurricanes.py
+
+Fetches active tropical cyclone data from GDACS (global, free),
+extracts coordinates and metadata, and pushes to Firebase under /hurricanes.
 """
 
 import os
-import sys
-import json
 import time
+import json
 import requests
-from datetime import datetime, timezone
+from datetime import datetime, timedelta
 
-print(f"[{datetime.utcnow().strftime('%H:%M:%S')}] === Starting Hurricane Injection Job ===")
+# ---------------------------
+# Config
+# ---------------------------
+FIREBASE_URL = os.environ.get(
+    "FIREBASE_URL",
+    "https://geomonitor-2025-default-rtdb.europe-west1.firebasedatabase.app/"
+).rstrip("/")
 
-# ============================================================
-#  Configuration and environment setup
-# ============================================================
+GDACS_URL = "https://www.gdacs.org/gdacsapi/api/eventsgeojson?eventtype=TC"
 
-FIREBASE_URL = os.getenv("FIREBASE_URL")
-GDACS_URL = "https://www.gdacs.org/gdacsapi/api/events/getEvents?eventtype=TC"
+def log(msg: str):
+    print(f"[{datetime.utcnow().strftime('%H:%M:%S')}] {msg}")
 
-if not FIREBASE_URL:
-    print("❌ ERROR: FIREBASE_URL not set.")
-    sys.exit(1)
+log("=== Starting Hurricane Injection Job ===")
 
-# ============================================================
-#  Helper functions
-# ============================================================
-
+# ---------------------------
+# Fetch hurricanes from GDACS
+# ---------------------------
 def fetch_hurricanes():
-    """Fetch hurricane (tropical cyclone) data from GDACS API."""
     try:
-        r = requests.get(GDACS_URL, timeout=15)
+        r = requests.get(GDACS_URL, timeout=30)
         r.raise_for_status()
         data = r.json()
-        return data.get("features", []) or data.get("events", [])
-    except requests.exceptions.HTTPError as e:
-        print(f"⚠️ GDACS fetch failed: {e}")
     except Exception as e:
-        print(f"⚠️ Error fetching GDACS data: {e}")
-    return []
+        log(f"⚠️ GDACS fetch failed: {e}")
+        return {}
 
+    features = data.get("features", [])
+    if not features:
+        log("[INFO] No hurricanes found or API returned empty data.")
+        return {}
 
-def push_to_firebase(event):
-    """Push a single hurricane event to Firebase."""
-    if not FIREBASE_URL:
-        print("❌ Firebase URL missing — skipping upload.")
-        return
+    hurricanes = {}
+    for i, f in enumerate(features):
+        props = f.get("properties", {})
+        geom = f.get("geometry", {})
+        coords = geom.get("coordinates")
 
-    try:
-        url = f"{FIREBASE_URL.rstrip('/')}/hurricanes.json"
-        r = requests.post(url, json=event, timeout=10)
-        r.raise_for_status()
-        print(f"✅ Uploaded hurricane: {event.get('name', 'unnamed')}")
-    except Exception as e:
-        print(f"❌ Firebase upload failed: {e}")
+        if not coords or len(coords) < 2:
+            continue
 
+        lon, lat = coords[0], coords[1]
+        name = props.get("eventname") or props.get("eventid") or "Unnamed Storm"
+        severity = props.get("alertlevel", "green")
+        desc = props.get("fromdate") + " → " + props.get("todate") if props.get("fromdate") else "Active tropical cyclone"
 
-# ============================================================
-#  Main logic
-# ============================================================
-
-def main():
-    hurricanes = fetch_hurricanes()
-    if not hurricanes:
-        print("[INFO] No hurricanes found or API returned empty data.")
-        print(f"[{datetime.utcnow().strftime('%H:%M:%S')}] === Job Complete ===")
-        return
-
-    print(f"[INFO] Found {len(hurricanes)} hurricane events.")
-    for h in hurricanes:
-        # Handle both GeoJSON and legacy GDACS formats
-        props = h.get("properties", h)
-        geometry = h.get("geometry", {})
-
-        name = props.get("eventname", "Unknown Storm")
-        event_id = props.get("eventid") or props.get("identifier", "none")
-        from_date = props.get("fromdate") or props.get("date", "")
-        alert_level = props.get("alertlevel", "green").lower()
-        country = props.get("country", "Unknown")
-        magnitude = props.get("severity", props.get("magnitude", ""))
-
-        coords = None
-        if geometry and "coordinates" in geometry:
-            coords = geometry["coordinates"]
-            if isinstance(coords, list) and len(coords) >= 2:
-                coords = {"lon": coords[0], "lat": coords[1]}
-            else:
-                coords = None
-
-        entry = {
-            "id": event_id,
-            "name": name,
-            "country": country,
-            "alert_level": alert_level,
-            "magnitude": magnitude,
-            "from_date": from_date,
-            "coords": coords,
-            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        key = f"hurricane_{int(time.time())}_{i}"
+        hurricanes[key] = {
+            "title": f"🌀 {name}",
+            "description": f"{desc}",
+            "type": "Hurricane",
+            "url": f"https://www.gdacs.org/report.aspx?eventtype=TC&eventid={props.get('eventid', '')}",
+            "lat": lat,
+            "lon": lon,
+            "timestamp": datetime.utcnow().isoformat(),
+            "topic": "disaster",
+            "importance": 5 if severity.lower() in ["red", "orange"] else 4,
         }
 
-        push_to_firebase(entry)
-        time.sleep(0.3)  # small delay to avoid rate limits
-
-    print(f"[{datetime.utcnow().strftime('%H:%M:%S')}] === Job Complete ===")
+    log(f"✅ Parsed {len(hurricanes)} hurricanes from GDACS.")
+    return hurricanes
 
 
-# ============================================================
-#  Entrypoint
-# ============================================================
+# ---------------------------
+# Push to Firebase
+# ---------------------------
+def push_hurricanes(hurricanes):
+    fb_url = f"{FIREBASE_URL}/hurricanes.json"
+    cutoff = datetime.utcnow() - timedelta(days=7)
 
-if __name__ == "__main__":
     try:
-        main()
-    except KeyboardInterrupt:
-        print("\n🛑 Interrupted by user.")
+        old = requests.get(fb_url, timeout=10).json() or {}
+        log(f"Fetched {len(old)} old hurricanes.")
+    except Exception:
+        old = {}
+
+    kept = {}
+    for k, v in old.items():
+        ts = v.get("timestamp")
+        if not ts:
+            continue
+        try:
+            dt = datetime.fromisoformat(ts.replace("Z", ""))
+            if dt > cutoff:
+                kept[k] = v
+        except Exception:
+            pass
+
+    merged = {**kept, **hurricanes}
+    try:
+        r = requests.put(fb_url, data=json.dumps(merged), timeout=15)
+        r.raise_for_status()
+        log(f"✅ PUSH COMPLETE: {len(merged)} total hurricanes.")
     except Exception as e:
-        print(f"❌ Fatal error: {e}")
-        sys.exit(1)
+        log(f"❌ PUSH FAILED: {e}")
+
+
+# ---------------------------
+# Main
+# ---------------------------
+if __name__ == "__main__":
+    hurricanes = fetch_hurricanes()
+    if hurricanes:
+        push_hurricanes(hurricanes)
+    else:
+        log("[INFO] No new hurricane data to push.")
+    log("=== Job Complete ===")
