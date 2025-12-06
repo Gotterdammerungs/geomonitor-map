@@ -1,0 +1,92 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#map {
+    height: 100%;
+    width: 100%;
+}
+
+/* --- Control Panel --- */
+#control-panel {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(20, 20, 20, 0.8);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    font-family: sans-serif;
+    font-size: 14px;
+    z-index: 9999;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+#control-panel.light {
+    background: rgba(255, 255, 255, 0.9);
+    color: #222;
+}
+
+#control-panel button,
+#control-panel input[type="range"] {
+    margin-top: 8px;
+    width: 100%;
+}
+
+/* --- CRT Effects --- */
+.crt-scanlines::before {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 2;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+    opacity: var(--crt-opacity, 1);
+}
+
+.crt-flicker::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: rgba(18, 16, 16, 0.1);
+    opacity: 0;
+    z-index: 2;
+    pointer-events: none;
+    animation: flicker 0.15s infinite;
+}
+
+@keyframes flicker {
+    0% {opacity: 0.28;}
+    20% {opacity: 0.9;}
+    40% {opacity: 0.25;}
+    60% {opacity: 0.7;}
+    80% {opacity: 0.3;}
+    100% {opacity: 0.25;}
+}
+
+.crt-colorsep {
+    animation: textShadow 1.6s infinite;
+}
+
+@keyframes textShadow {
+    0%, 100% {text-shadow: 2px 0 1px rgba(0,30,255,0.5), -2px 0 1px rgba(255,0,80,0.3);}
+    50% {text-shadow: 4px 0 1px rgba(0,30,255,0.5), -4px 0 1px rgba(255,0,80,0.3);}
+}
+
+/* --- Dark/Light modes --- */
+body.dark {
+    background-color: #111;
+    color: #eee;
+}
+
+body.light {
+    background-color: #f2f2f2;
+    color: #111;
+}
+
